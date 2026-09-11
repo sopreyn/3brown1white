@@ -22,7 +22,7 @@ so it's light, fast, and trivial to host.
    mascot boss who throws baseballs.
 
 Each level is a bit longer than the last, and Buddy's max HP goes up by one
-every level (5 → 9). Beat the final boss and watch Buddy fly off into a
+every level (6 → 10). Beat the final boss and watch Buddy fly off into a
 sunset "YOU WON!" ending.
 
 ## Controls

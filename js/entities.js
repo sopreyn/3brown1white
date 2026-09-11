@@ -294,7 +294,7 @@ export const BOSS_TYPES = {
     name: 'Big League Ball',
     scale: 3,
     hp: 22,
-    damage: 2,
+    damage: 1,
     speed: 40,
     points: 1000,
     override: S.BASEBALL_BOSS_OVERRIDE,
@@ -305,7 +305,7 @@ export const BOSS_TYPES = {
     name: 'Foreman Slugger',
     scale: 2.6,
     hp: 26,
-    damage: 2,
+    damage: 1,
     speed: 22,
     points: 1200,
     override: S.WORKER_BOSS_OVERRIDE,
@@ -316,7 +316,7 @@ export const BOSS_TYPES = {
     name: 'Marathon Mike',
     scale: 2.6,
     hp: 24,
-    damage: 2,
+    damage: 1,
     speed: 30,
     points: 1200,
     override: S.JOGGER_BOSS_OVERRIDE,
@@ -327,7 +327,7 @@ export const BOSS_TYPES = {
     name: 'The Chairman',
     scale: 2.6,
     hp: 28,
-    damage: 2,
+    damage: 1,
     speed: 20,
     points: 1400,
     override: S.SUIT_BOSS_OVERRIDE,
@@ -338,7 +338,7 @@ export const BOSS_TYPES = {
     name: 'Rowdy the Riverboat',
     scale: 2.4,
     hp: 32,
-    damage: 2,
+    damage: 1,
     speed: 26,
     points: 2000,
     override: null,
@@ -392,10 +392,10 @@ export class Enemy {
     if (this.hurtFlash > 0) this.hurtFlash -= dt;
     if (this.contactCooldown > 0) this.contactCooldown -= dt;
 
-    const chaseRange = 100;
+    const chaseRange = 70;
     const dx = playerX - this.x;
     if (Math.abs(dx) < chaseRange) {
-      this.vx = Math.sign(dx) * this.cfg.speed * 1.1 || this.vx;
+      this.vx = Math.sign(dx) * this.cfg.speed || this.vx;
       this.facing = dx < 0 ? -1 : 1;
     } else {
       if (this.x <= this.minX) this.vx = Math.abs(this.cfg.speed);
