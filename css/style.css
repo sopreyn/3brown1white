@@ -28,7 +28,7 @@ html, body {
 
 #app {
   height: 100vh;
-  height: 100dvh;
+  height: var(--app-vh, 100svh);
   width: 100vw;
   display: flex;
   flex-direction: column;
@@ -43,8 +43,10 @@ html, body {
   position: relative;
   /* Fit inside whichever of viewport width/height is tighter, so the frame
      (and its touch controls) is never taller than the screen — critical for
-     short landscape phone viewports, where scrolling is otherwise disabled. */
-  width: min(calc(100vw - 16px), calc((100dvh - 16px) * (480 / 270)), 960px);
+     short landscape phone viewports, where scrolling is otherwise disabled.
+     --app-vh (set in index.html) is the actual measured visible height,
+     which is more reliable than dvh/svh on some mobile browser versions. */
+  width: min(calc(100vw - 16px), calc((var(--app-vh, 100svh) - 16px) * (480 / 270)), 960px);
   aspect-ratio: 480 / 270;
   background: #000;
   border: 3px solid var(--bats-red);

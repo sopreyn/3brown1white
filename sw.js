@@ -1,6 +1,6 @@
 // Minimal offline cache so Buddy the Bat keeps working once it's been loaded
 // (handy for a "installed to home screen" mobile play session).
-const CACHE_NAME = 'buddy-the-bat-v1';
+const CACHE_NAME = 'buddy-the-bat-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -33,19 +33,19 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Network-first: while online, always serve the latest deployed files (so a
+// fix like this one shows up immediately instead of being masked by a stale
+// cache). Only fall back to the cache when the network request fails, i.e.
+// actually offline.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then(
-      (cached) =>
-        cached ||
-        fetch(event.request)
-          .then((res) => {
-            const copy = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-            return res;
-          })
-          .catch(() => cached)
-    )
+    fetch(event.request)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        return res;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

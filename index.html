@@ -6,6 +6,22 @@
   <meta name="theme-color" content="#c8102e" />
   <meta name="description" content="Buddy the Bat — an 8-bit side-scrolling adventure starring the Louisville Bats mascot." />
   <title>Buddy the Bat</title>
+  <script>
+    // Measure the real visible viewport height directly (mobile browser
+    // chrome — address bar, favorites strip, etc. — makes 100vh/100dvh
+    // unreliable on some devices/versions). --app-vh drives #app's height
+    // in style.css, with 100svh as the fallback until this runs.
+    (function () {
+      function setAppVH() {
+        var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+        document.documentElement.style.setProperty('--app-vh', h + 'px');
+      }
+      setAppVH();
+      window.addEventListener('resize', setAppVH);
+      window.addEventListener('orientationchange', setAppVH);
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', setAppVH);
+    })();
+  </script>
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="assets/icon.svg" />
   <link rel="manifest" href="manifest.json" />
