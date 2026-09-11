@@ -1,0 +1,14 @@
+{
+  "name": "Buddy the Bat",
+  "short_name": "Buddy the Bat",
+  "description": "An 8-bit side-scrolling adventure starring the Louisville Bats mascot.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0a080e",
+  "theme_color": "#c8102e",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

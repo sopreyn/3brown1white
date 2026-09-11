@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#c8102e" />
+  <meta name="description" content="Buddy the Bat — an 8-bit side-scrolling adventure starring the Louisville Bats mascot." />
+  <title>Buddy the Bat</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/icon.svg" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="gameFrame">
+      <canvas id="gameCanvas" width="480" height="270"></canvas>
+
+      <!-- Title screen -->
+      <section id="titleScreen" class="overlay">
+        <img class="logo" src="assets/icon.svg" alt="Buddy the Bat logo" width="96" height="96" />
+        <h1>BUDDY <span class="accent">THE BAT</span></h1>
+        <p class="subtitle">A Louisville Bats 8-bit Adventure</p>
+        <p id="bestScore" class="score-line"></p>
+        <button id="startBtn" class="pixel-btn">TAP TO PLAY</button>
+        <div class="howto">
+          <p>◀ ▶ or arrow keys to walk &middot; ▲ or Space to jump</p>
+          <p>Tap the screen (or click) to swing your bat!</p>
+        </div>
+        <button id="muteBtn" class="pixel-btn small" aria-label="Toggle sound">🔊 SOUND</button>
+      </section>
+
+      <!-- Pause -->
+      <section id="pauseScreen" class="overlay hidden">
+        <h2>PAUSED</h2>
+        <button id="resumeBtn" class="pixel-btn">RESUME</button>
+        <button id="restartLevelBtn" class="pixel-btn">RESTART LEVEL</button>
+        <button id="quitBtn" class="pixel-btn">QUIT TO TITLE</button>
+      </section>
+
+      <!-- Level complete -->
+      <section id="levelCompleteScreen" class="overlay hidden">
+        <h2 id="levelCompleteTitle">LEVEL COMPLETE!</h2>
+        <p id="levelCompleteScore" class="score-line"></p>
+        <button id="nextLevelBtn" class="pixel-btn">CONTINUE</button>
+      </section>
+
+      <!-- Game over -->
+      <section id="gameOverScreen" class="overlay hidden">
+        <h2>GAME OVER</h2>
+        <p id="gameOverScore" class="score-line"></p>
+        <button id="retryLevelBtn" class="pixel-btn">RETRY LEVEL</button>
+        <button id="restartGameBtn" class="pixel-btn">RESTART GAME</button>
+      </section>
+
+      <!-- Win -->
+      <section id="winScreen" class="overlay hidden">
+        <h2>YOU WON!</h2>
+        <p class="subtitle">Buddy saved the season!</p>
+        <p id="winScore" class="score-line"></p>
+        <button id="playAgainBtn" class="pixel-btn">PLAY AGAIN</button>
+      </section>
+
+      <!-- HUD button bar (always present during play) -->
+      <button id="pauseBtn" class="hud-btn" aria-label="Pause">❚❚</button>
+
+      <div id="touchControls">
+        <div id="leftBtn" class="touch-btn move-btn" aria-label="Move left">◀</div>
+        <div id="rightBtn" class="touch-btn move-btn" aria-label="Move right">▶</div>
+        <div id="jumpBtn" class="touch-btn jump-btn" aria-label="Jump">▲</div>
+      </div>
+    </div>
+    <p class="footer-note">Tap the playfield to swing the bat. Original fan game — not affiliated with MiLB.</p>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+  --bats-red: #c8102e;
+  --bats-black: #111111;
+  --bats-white: #f5f5f0;
+  --panel: rgba(10, 8, 14, 0.92);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #0a080e;
+  color: var(--bats-white);
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+#app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+}
+
+#gameFrame {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  aspect-ratio: 480 / 270;
+  background: #000;
+  border: 3px solid var(--bats-red);
+  border-radius: 6px;
+  box-shadow: 0 0 0 3px var(--bats-black), 0 10px 30px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  touch-action: none;
+}
+
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------------- overlays */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 16px;
+  z-index: 20;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay h1 {
+  font-size: clamp(16px, 4.2vw, 28px);
+  margin: 6px 0 2px;
+  color: var(--bats-white);
+  letter-spacing: 1px;
+}
+
+.overlay h1 .accent {
+  color: var(--bats-red);
+}
+
+.overlay h2 {
+  font-size: clamp(14px, 3.6vw, 22px);
+  margin: 4px 0;
+  color: var(--bats-red);
+  text-shadow: 2px 2px 0 var(--bats-black);
+}
+
+.overlay .subtitle {
+  font-size: clamp(8px, 2vw, 11px);
+  color: #d8b8c0;
+  margin: 0 0 6px;
+}
+
+.overlay .logo {
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.4));
+}
+
+.howto {
+  font-size: clamp(6px, 1.6vw, 9px);
+  line-height: 1.8;
+  color: #c8c8d0;
+  max-width: 90%;
+}
+
+.score-line {
+  font-size: clamp(9px, 2.2vw, 13px);
+  color: #ffd76a;
+}
+
+.pixel-btn {
+  font-family: inherit;
+  font-size: clamp(9px, 2.4vw, 13px);
+  color: var(--bats-white);
+  background: var(--bats-red);
+  border: none;
+  border-bottom: 4px solid #7a0a1c;
+  padding: 12px 20px;
+  border-radius: 3px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  touch-action: manipulation;
+}
+
+.pixel-btn:active {
+  border-bottom-width: 1px;
+  transform: translateY(3px);
+}
+
+.pixel-btn.small {
+  font-size: clamp(7px, 1.8vw, 10px);
+  background: #2a2a33;
+  border-bottom-color: #111;
+  padding: 8px 14px;
+}
+
+/* ---------------------------------------------------------------- HUD */
+
+.hud-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 26px;
+  background: rgba(10, 8, 14, 0.6);
+  color: var(--bats-white);
+  border: 2px solid var(--bats-white);
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  z-index: 15;
+}
+
+#touchControls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.touch-btn {
+  position: absolute;
+  bottom: 14px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(245, 245, 240, 0.16);
+  border: 2px solid rgba(245, 245, 240, 0.55);
+  color: var(--bats-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.touch-btn:active {
+  background: rgba(245, 245, 240, 0.4);
+}
+
+#leftBtn {
+  left: 14px;
+}
+#rightBtn {
+  left: 80px;
+}
+#jumpBtn {
+  right: 14px;
+  bottom: 14px;
+}
+
+.footer-note {
+  font-size: 9px;
+  color: #6a6a76;
+  text-align: center;
+  max-width: 480px;
+  font-family: 'Courier New', monospace;
+}
+
+@media (max-width: 480px) {
+  #leftBtn { left: 10px; bottom: 12px; width: 50px; height: 50px; }
+  #rightBtn { left: 68px; bottom: 12px; width: 50px; height: 50px; }
+  #jumpBtn { right: 10px; bottom: 12px; width: 50px; height: 50px; }
+  .footer-note { display: none; }
+}
+
+@media (orientation: portrait) and (max-height: 700px) {
+  #gameFrame { max-width: 100%; }
+}
