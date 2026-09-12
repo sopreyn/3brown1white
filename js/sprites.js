@@ -113,10 +113,13 @@ export function drawPlayerImage(ctx, img, x, y, w, h, opts = {}) {
 // with recolored eyes, per the "big version of the little guy" design.
 // ---------------------------------------------------------------------------
 
-export const BASEBALL_PALETTE = { w: '#f5f5f0', s: '#c8102e', e: '#111111', o: '#8b1023' };
+export const BASEBALL_PALETTE = { w: '#f5f5f0', s: '#c8102e', e: '#111111' };
 export const BASEBALL_FRAMES = {
-  roll1: ['.wwwwww.', 'wwwwwwww', 'we.ww.ew', 'wwwwwwww', 'wswwwwsw', 'wwwwwwww', 'wwssssww', '.wwwwww.'],
-  roll2: ['.wwwwww.', 'wwewweww', 'wwwwwwww', 'wswwwwsw', 'wwwwwwww', 'wwssssww', 'wwwwwwww', '.wwwwww.'],
+  // Red stitch marks ringing the ball like real baseball seams, with an
+  // angry eyebrow "face"; the two frames rotate the stitch/eyebrow rows to
+  // sell a spinning roll.
+  roll1: ['.wwwwww.', 'we.ww.ew', 'wwswwsww', 'swwwwwws', 'swwwwwws', 'wwswwsww', 'wwwwwwww', '.wwwwww.'],
+  roll2: ['.wwwwww.', 'wwswwsww', 'we.ww.ew', 'wwwwwwww', 'swwwwwws', 'swwwwwws', 'wwswwsww', '.wwwwww.'],
 };
 export const BASEBALL_BOSS_OVERRIDE = { e: '#ffdd00', s: '#8b1023' };
 
@@ -130,13 +133,17 @@ export const WORKER_FRAMES = {
 export const WORKER_BOSS_OVERRIDE = { f: '#d99a66', h: '#ff3b3b' };
 
 export const JOGGER_PALETTE = {
-  h: '#ff7a00', f: '#e8b686', j: '#1f8a70', d: '#12604d', l: '#dfe3e6', s: '#ffffff',
+  h: '#141110', // black hair
+  f: '#f0be96', // tan skin
+  j: '#faf9f6', // white tank top
+  b: '#3a64af', // blue shorts
+  s: '#d21e23', // red running shoes
 };
 export const JOGGER_FRAMES = {
-  run1: ['..hhhh..', '.hffffh.', '.ffffff.', '.f.ff.f.', '..ffff..', '.jjjjjj.', 'jjjjjjjj', '.jjdjjj.', '.ll..ll.', 'l......l', 's......s', '........'],
-  run2: ['..hhhh..', '.hffffh.', '.ffffff.', '.f.ff.f.', '..ffff..', '.jjjjjj.', 'jjjjjjjj', '.jjdjjj.', '..ll.ll.', '.l....l.', '.s....s.', '........'],
+  run1: ['..hhhh..', '.hffffh.', '.ffffff.', '.f.ff.f.', '..ffff..', '.jjjjjj.', 'fjjjjjjf', '.jjjjjj.', '..bbbb..', '.bb..bb.', 'f....f..', 's....ss.'],
+  run2: ['..hhhh..', '.hffffh.', '.ffffff.', '.f.ff.f.', '..ffff..', '.jjjjjj.', 'jjjjjjjf', '.jjjjjj.', '..bbbb..', '.bb..bb.', '..f....f', '.ss....s'],
 };
-export const JOGGER_BOSS_OVERRIDE = { f: '#c97a45', h: '#ff1a1a' };
+export const JOGGER_BOSS_OVERRIDE = { f: '#c97a45', h: '#8a1414' };
 
 export const SUIT_PALETTE = {
   h: '#2b2320', f: '#e8b686', s: '#26324a', t: '#c8102e', g: '#1a2436', b: '#5b3a1e', o: '#111111',

@@ -1,6 +1,6 @@
 import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, STORAGE_KEY } from './constants.js';
 import { Player, Enemy, Boss, Pickup, Projectile, aabb } from './entities.js';
-import { LEVELS, drawBackground, drawEndingBackground } from './levels.js';
+import { LEVELS, drawBackground, drawEndingBackground, drawBridgeForegroundBeams } from './levels.js';
 import * as S from './sprites.js';
 import { Input, setupInput, consumeJump, consumeSwing, consumePause } from './input.js';
 import { sfx, resumeAudio, setMuted, isMuted } from './audio.js';
@@ -394,6 +394,7 @@ function render() {
   player.draw(ctx, camX, world.tick);
 
   drawAmbientAtmosphereOverlay(ctx, lighting);
+  if (level.bg === 'bridge') drawBridgeForegroundBeams(ctx, camX, world.tick);
 
   drawBossHealthBar();
   drawHud();
@@ -484,7 +485,7 @@ function renderEnding() {
   const y = GAME_HEIGHT / 2 - 10 + Math.sin(world.tick * 5) * 14;
   const wingFlap = Math.sin(world.tick * 14) * 0.08;
   S.drawPlayerImage(ctx, S.getPlayerImage(), x - 14, y - 12, 28, 25, {
-    flip: true, // flying left-to-right; artwork's natural pose faces left
+    flip: false, // flying left-to-right; artwork's natural pose already faces right
     rotation: -0.15 + wingFlap,
   });
 

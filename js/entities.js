@@ -193,7 +193,7 @@ export class Player {
     const tint = this.invincibleTimer > 0 ? hslCycle(tick, 0) : null;
 
     S.drawPlayerImage(ctx, S.getPlayerImage(), this.x - camX, this.y + bob, this.w, this.h, {
-      flip: this.facing === 1, // artwork's natural pose faces left
+      flip: this.facing === -1, // artwork's natural pose faces right
       rotation: tilt,
       tint,
     });

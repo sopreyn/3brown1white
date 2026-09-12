@@ -803,6 +803,52 @@ export function drawEndingBackground(ctx, tick) {
   BG.ending(ctx, 0, tick);
 }
 
+/**
+ * Big Four Bridge only: occasionally sweep a big steel support beam across
+ * the whole foreground, as if you're walking right past one of the truss's
+ * diagonal members — closer to the camera than anything else on screen, so
+ * it briefly obstructs the view the way the real structure would from
+ * outside/beside the bridge. Drawn on top of everything except the HUD.
+ */
+export function drawBridgeForegroundBeams(ctx, camX, tick) {
+  const patternW = 950;
+  const beamW = 46;
+  const lean = 30; // px the beam tilts from top to bottom
+
+  repeatParallax(camX, 1.25, patternW, GAME_WIDTH, (x) => {
+    const beamX = x + 60;
+    if (beamX + lean < -beamW || beamX > GAME_WIDTH + beamW) return;
+
+    ctx.save();
+    const grad = ctx.createLinearGradient(beamX, 0, beamX + beamW, 0);
+    grad.addColorStop(0, 'rgba(8, 6, 5, 0.96)');
+    grad.addColorStop(0.4, 'rgba(58, 36, 26, 0.95)');
+    grad.addColorStop(0.6, 'rgba(94, 62, 42, 0.92)');
+    grad.addColorStop(1, 'rgba(8, 6, 5, 0.96)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(beamX, 0);
+    ctx.lineTo(beamX + beamW, 0);
+    ctx.lineTo(beamX + beamW + lean, GAME_HEIGHT);
+    ctx.lineTo(beamX + lean, GAME_HEIGHT);
+    ctx.closePath();
+    ctx.fill();
+
+    // Rivets down the centerline, sunlight catching one edge
+    ctx.fillStyle = 'rgba(255, 220, 180, 0.12)';
+    ctx.fillRect(beamX + beamW - 6, 0, 3, GAME_HEIGHT);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    for (let ry = 14; ry < GAME_HEIGHT; ry += 30) {
+      const t = ry / GAME_HEIGHT;
+      const rx = beamX + beamW / 2 + lean * t;
+      ctx.beginPath();
+      ctx.arc(rx, ry, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Level data
 // ---------------------------------------------------------------------------
