@@ -17,10 +17,21 @@ export function resumeAudio() {
   if (c && c.state === 'suspended') c.resume();
 }
 
+// Per-level background music. Levels without a dedicated track yet
+// (5 and 6) fall back to the main theme.
+const MUSIC_TRACKS = {
+  theme: 'assets/music/theme.mp3',
+  1: 'assets/music/baby-with-a-rat-tail.mp3',
+  2: 'assets/music/violet-interiors.mp3',
+  3: 'assets/music/in-a-shed.mp3',
+  4: 'assets/music/the-beef-boy.mp3',
+};
+
 let music = null;
+let currentTrack = null;
 function getMusic() {
   if (!music) {
-    music = new Audio('assets/theme.mp3');
+    music = new Audio();
     music.loop = true;
     music.volume = 0.5;
     music.preload = 'auto';
@@ -28,11 +39,26 @@ function getMusic() {
   return music;
 }
 
-/** Start the theme song looping. Call this from a user-gesture handler —
+function playTrack(key) {
+  const src = MUSIC_TRACKS[key] || MUSIC_TRACKS.theme;
+  const m = getMusic();
+  if (currentTrack !== key) {
+    currentTrack = key;
+    m.src = src;
+  }
+  if (!muted) m.play().catch(() => {});
+}
+
+/** Start the title theme looping. Call this from a user-gesture handler —
  * browsers block audio playback before the first tap/click. */
 export function startMusic() {
-  const m = getMusic();
-  if (!muted) m.play().catch(() => {});
+  playTrack('theme');
+}
+
+/** Switch background music to the track for the given level id (falls
+ * back to the main theme if that level has no dedicated track yet). */
+export function playLevelMusic(levelId) {
+  playTrack(MUSIC_TRACKS[levelId] ? levelId : 'theme');
 }
 
 export function setMuted(value) {

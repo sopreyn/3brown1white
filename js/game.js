@@ -3,7 +3,7 @@ import { Player, Enemy, Boss, Pickup, Projectile, aabb, drawFireHazard } from '.
 import { LEVELS, drawBackground, drawEndingBackground, drawBridgeForegroundBeams } from './levels.js';
 import * as S from './sprites.js';
 import { Input, setupInput, consumeJump, consumeSwing, consumePause } from './input.js';
-import { sfx, resumeAudio, setMuted, isMuted, startMusic } from './audio.js';
+import { sfx, resumeAudio, setMuted, isMuted, startMusic, playLevelMusic } from './audio.js';
 import { computeLighting, drawEntityShadows, drawAmbientAtmosphereOverlay } from './lighting.js';
 
 // Title screen reuses level 1's background at its "story cycle" time of day.
@@ -121,6 +121,7 @@ function loadLevel(index, resetPosition) {
   const level = LEVELS[index];
   world.level = level;
   world.lighting = computeLighting('cycle', level.id);
+  playLevelMusic(level.id);
   world.camX = 0;
   world.enemies = level.enemySpawns.map((s) => new Enemy(s.type, s.x, s.x - 90, s.x + 90));
   world.boss = new Boss(level.bossKey, level.bossX, level.arena.minX, level.arena.maxX);
@@ -166,6 +167,7 @@ function startEndingCutscene() {
   world.state = 'ending';
   world.cutsceneTimer = 0;
   hideAllOverlays();
+  startMusic();
   sfx.win();
 }
 
@@ -590,6 +592,7 @@ function initUI() {
   });
   dom.quitBtn.addEventListener('click', () => {
     sfx.uiSelect();
+    startMusic();
     showOverlay('title');
     world.state = 'title';
   });
