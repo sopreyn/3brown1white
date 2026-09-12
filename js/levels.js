@@ -3,12 +3,12 @@ import { drawSkyAndCelestial, drawStadiumFloodlightBeams } from './lighting.js';
 
 // ---------------------------------------------------------------------------
 // Background painters — layered, parallax-scrolling scenery styled after the
-// real Louisville/Cincinnati landmarks for each level, lit by the dynamic
-// time-of-day system in lighting.js (each level gets its own hour via the
-// "story cycle": stadium in the afternoon -> factory late day -> the bridge
-// at golden sunset -> downtown at neon twilight -> the away game under
-// Friday-night floodlights). Everything is drawn procedurally — no image
-// assets to load.
+// real Louisville landmarks (plus a generic away-city skyline for the road
+// trip finale) for each level, lit by the dynamic time-of-day system in
+// lighting.js (each level gets its own hour via the "story cycle": stadium
+// in the afternoon -> factory late day -> the bridge at golden sunset ->
+// downtown at neon twilight -> the away game under Friday-night floodlights).
+// Everything is drawn procedurally — no image assets to load.
 // ---------------------------------------------------------------------------
 
 /** Repeat a draw callback across the visible width, offset by parallax. */
@@ -669,26 +669,26 @@ const BG = {
   },
 
   // -------------------------------------------------------------------
-  // Away game — Cincinnati's Great American Ball Park: the riverfront
-  // skyline (Great American Tower's tiara, Carew Tower, the Roebling
-  // Bridge), the iconic power-stack smokestacks with shooting flames.
+  // Away game — Columbus Clippers' home turf: a generic downtown skyline,
+  // a river overlook, and the iconic power-stack smokestacks with shooting
+  // flames shared with the home stadium's design language.
   // -------------------------------------------------------------------
-  redsStadium(ctx, camX, tick, lighting) {
+  clippersStadium(ctx, camX, tick, lighting) {
     drawSkyAndCelestial(ctx, lighting, tick);
 
     repeatParallax(camX, 0.16, 280, GAME_WIDTH, (x) => {
       ctx.save();
-      const cincyTone = lighting.hour >= 20 || lighting.hour < 5 ? '#101726' : lighting.hour >= 18 ? '#332742' : '#526982';
-      ctx.fillStyle = cincyTone;
+      const awayTone = lighting.hour >= 20 || lighting.hour < 5 ? '#101726' : lighting.hour >= 18 ? '#332742' : '#526982';
+      ctx.fillStyle = awayTone;
 
-      const gatX = x + 30;
-      ctx.fillRect(gatX, 60, 50, 130);
+      const towerX = x + 30;
+      ctx.fillRect(towerX, 60, 50, 130);
       ctx.beginPath();
-      ctx.moveTo(gatX, 60);
-      ctx.lineTo(gatX + 12, 38);
-      ctx.lineTo(gatX + 25, 48);
-      ctx.lineTo(gatX + 38, 38);
-      ctx.lineTo(gatX + 50, 60);
+      ctx.moveTo(towerX, 60);
+      ctx.lineTo(towerX + 12, 38);
+      ctx.lineTo(towerX + 25, 48);
+      ctx.lineTo(towerX + 38, 38);
+      ctx.lineTo(towerX + 50, 60);
       ctx.fill();
 
       ctx.fillRect(x + 110, 72, 40, 118);
@@ -751,7 +751,7 @@ const BG = {
       ctx.font = 'bold 7px sans-serif';
       ctx.fillStyle = '#ffdd00';
       ctx.textAlign = 'center';
-      ctx.fillText('AWAY GAME: CINCY', x + 165, 72);
+      ctx.fillText('AWAY GAME: COLUMBUS', x + 165, 72);
       ctx.font = '5px monospace';
       ctx.fillStyle = '#f5f5f0';
       ctx.fillText('BATS VS RIVALS', x + 165, 82);
@@ -1123,11 +1123,11 @@ export const LEVELS = [
   }),
   buildLevel({
     id: 6,
-    name: 'Away Game: Cincinnati',
-    bg: 'redsStadium',
+    name: 'Away Game: Columbus',
+    bg: 'clippersStadium',
     width: 4900,
     maxHp: 11,
-    enemyType: 'redsplayer',
+    enemyType: 'clippersplayer',
     enemyCount: 11,
     bugCount: 7,
     goldBugCount: 3,

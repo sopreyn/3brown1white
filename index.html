@@ -80,11 +80,24 @@
         <button id="restartGameBtn" class="pixel-btn">RESTART GAME</button>
       </section>
 
+      <!-- Name entry (shown once, right after the ending cutscene) -->
+      <section id="nameEntryScreen" class="overlay hidden">
+        <h2>YOU WON!</h2>
+        <p class="subtitle">Enter your name for the scoreboard</p>
+        <p id="nameEntryScore" class="score-line"></p>
+        <input id="nameInput" class="pixel-input" type="text" maxlength="12" placeholder="BUDDY" autocomplete="off" />
+        <button id="saveScoreBtn" class="pixel-btn">SAVE SCORE</button>
+      </section>
+
       <!-- Win -->
       <section id="winScreen" class="overlay hidden">
         <h2>YOU WON!</h2>
         <p class="subtitle">Buddy saved the season!</p>
         <p id="winScore" class="score-line"></p>
+        <div class="scoreboard">
+          <p class="scoreboard-title">TOP SCORES</p>
+          <div id="scoreboardList" class="scoreboard-list"></div>
+        </div>
         <button id="playAgainBtn" class="pixel-btn">PLAY AGAIN</button>
       </section>
 

@@ -163,7 +163,7 @@ export function getLevelCycleHour(levelId) {
     case 5:
       return 21.3; // Butchertown, deep dusk (stays readable, not pitch dark)
     case 6:
-      return 22.5; // Away game in Cincinnati, under Friday night floodlights
+      return 22.5; // Away game in Columbus, under Friday night floodlights
     default:
       return 15.0;
   }

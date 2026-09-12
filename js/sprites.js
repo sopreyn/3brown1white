@@ -158,10 +158,11 @@ export const SUIT_FRAMES = {
 };
 export const SUIT_BOSS_OVERRIDE = { f: '#d99a66', t: '#ffdd00' };
 
-export const REDS_PALETTE = {
-  c: '#c8102e', f: '#e8b686', u: '#ffffff', p: '#c8102e', k: '#c8102e', s: '#111111',
+// Columbus Clippers away-game roster — navy/red/gray, not the Reds.
+export const CLIPPERS_PALETTE = {
+  c: '#1a2f5c', f: '#e8b686', u: '#c9ccd1', p: '#1a2f5c', k: '#c8102e', s: '#111111',
 };
-export const REDS_FRAMES = {
+export const CLIPPERS_FRAMES = {
   walk1: ['..cccc..', '.cffffc.', '.ffffff.', '.f.ff.f.', '..uuuu..', '.uuuuuu.', 'uuuupuuu', '.uuuuuu.', '..pppp..', '.p....p.', 'k......k', 's......s'],
   walk2: ['..cccc..', '.cffffc.', '.ffffff.', '.f.ff.f.', '..uuuu..', '.uuuuuu.', 'uuuupuuu', '.uuuuuu.', '..pppp..', 'p....p..', '.k....k.', '.s....s.'],
 };
@@ -175,10 +176,10 @@ export const PIG_FRAMES = {
   walk2: ['..pp..pp..', '.pppppppp.', 'ppepppppps', 'ppppppppns', 'pdppppppss', '.pppppppp.', '.h.hh.h...', 'h.hh.h....'],
 };
 
-// Original mascot for the away game — NOT the real Reds mascot, a fictional
-// big fuzzy red "Rowdy" mascot invented for this game.
+// Original mascot for the away game — a fictional big fuzzy navy-blue
+// "Cappy the Clipper" mascot invented for this game, not any real team's.
 export const MASCOT_PALETTE = {
-  f: '#d61f36', h: '#8f1122', w: '#ffffff', b: '#111111', y: '#ffdd00',
+  f: '#1e3a6e', h: '#12234a', w: '#ffffff', b: '#111111', y: '#ffdd00',
 };
 export const MASCOT_FRAMES = {
   walk1: [
@@ -226,6 +227,21 @@ export const POWERUP_BAT_PALETTE = { t: '#ffe08a', d: '#c9861a', g: '#ffffff' };
 export const POWERUP_BAT_GRID = ['.gt', '.gt', '.gt', '.gd', '.gd', 'gdd', 'gdd', 'gdd'].map((r) =>
   r
 );
+
+/** Small plus-shaped pixel stars orbiting above a dazed enemy/boss's head —
+ * a lightweight "seeing stars" effect for a hit that didn't finish them off. */
+export function drawDazeStars(ctx, cx, y, tick, count = 3) {
+  for (let i = 0; i < count; i++) {
+    const angle = tick * 6 + (i / count) * Math.PI * 2;
+    const sx = cx + Math.cos(angle) * 8;
+    const sy = y + Math.sin(angle) * 3;
+    ctx.save();
+    ctx.fillStyle = '#ffe066';
+    ctx.fillRect(sx - 1.5, sy - 0.5, 3, 1);
+    ctx.fillRect(sx - 0.5, sy - 1.5, 1, 3);
+    ctx.restore();
+  }
+}
 
 export const HEART_PALETTE = { r: '#c8102e', k: '#5c0812' };
 export const HEART_FULL = ['.rr.rr.', 'rrrrrrr', 'rrrrrrr', '.rrrrr.', '..rrr..', '...r...'];

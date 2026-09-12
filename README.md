@@ -29,8 +29,8 @@ so it's light, fast, and trivial to host.
 5. **Butchertown** — a historic street with the pork rendering plant looming
    behind a chain-link fence; pig enemies, and a giant businessman boss (The
    Rendering Baron) who throws hams.
-6. **Away Game: Cincinnati** — rival baseball players, and a big fictional
-   mascot boss who throws baseballs.
+6. **Away Game: Columbus** — the Columbus Clippers, Buddy's main rivals, plus
+   a big fictional mascot boss (Cappy the Clipper) who throws baseballs.
 
 Each level is a bit longer than the last, and Buddy's max HP goes up by one
 every level (6 → 11). Beat the final boss and watch Buddy fly off into a
@@ -41,7 +41,14 @@ time-of-day lighting system (`js/lighting.js`) drives the sky/sun/moon,
 window and streetlamp glow, entity shadows, and stadium floodlights, so
 the game visually progresses from a sunny afternoon opener through a
 golden-hour sunset on the bridge to a Friday-night away game under the
-lights in Cincinnati.
+lights in Columbus.
+
+A full click-through narrative (`js/story.js`) runs between levels — Buddy
+waking up in his cave, the Louisville Bats team asking him for favors, boss
+taunts before each fight, and more — with each cutscene's music simply
+continuing from whatever level track was already playing. After the credits
+roll, players can enter a name to save their score to a local top-10
+scoreboard shown on the win screen.
 
 ## Controls
 

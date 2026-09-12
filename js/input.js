@@ -22,7 +22,10 @@ export function setupInput({ canvas, leftBtn, rightBtn, jumpBtn, pauseBtn }) {
   const isMoveKey = (code) =>
     ['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'].includes(code);
 
+  const isTextField = (target) => target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
+
   window.addEventListener('keydown', (e) => {
+    if (isTextField(e.target)) return;
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') Input.left = true;
     if (e.code === 'ArrowRight' || e.code === 'KeyD') Input.right = true;
     if (e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') {
@@ -34,6 +37,7 @@ export function setupInput({ canvas, leftBtn, rightBtn, jumpBtn, pauseBtn }) {
     if (isMoveKey(e.code)) e.preventDefault();
   });
   window.addEventListener('keyup', (e) => {
+    if (isTextField(e.target)) return;
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') Input.left = false;
     if (e.code === 'ArrowRight' || e.code === 'KeyD') Input.right = false;
   });

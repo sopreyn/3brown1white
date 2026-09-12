@@ -5,6 +5,7 @@ import * as S from './sprites.js';
 import { Input, setupInput, consumeJump, consumeSwing, consumePause } from './input.js';
 import { sfx, resumeAudio, setMuted, isMuted, startMusic, playLevelMusic } from './audio.js';
 import { computeLighting, drawEntityShadows, drawAmbientAtmosphereOverlay } from './lighting.js';
+import { STORY_INTRO, STORY_BEFORE, STORY_AFTER, renderStoryBeat, renderBossTaunt } from './story.js';
 
 // Title screen reuses level 1's background at its "story cycle" time of day.
 const TITLE_LIGHTING = computeLighting('cycle', 1);
@@ -20,12 +21,17 @@ const dom = {
   levelComplete: el('levelCompleteScreen'),
   gameOver: el('gameOverScreen'),
   win: el('winScreen'),
+  nameEntry: el('nameEntryScreen'),
   bestScore: el('bestScore'),
   levelCompleteTitle: el('levelCompleteTitle'),
   confettiLayer: el('confettiLayer'),
   levelCompleteScore: el('levelCompleteScore'),
   gameOverScore: el('gameOverScore'),
   winScore: el('winScore'),
+  nameEntryScore: el('nameEntryScore'),
+  nameInput: el('nameInput'),
+  saveScoreBtn: el('saveScoreBtn'),
+  scoreboardList: el('scoreboardList'),
   startBtn: el('startBtn'),
   muteBtn: el('muteBtn'),
   resumeBtn: el('resumeBtn'),
@@ -36,13 +42,14 @@ const dom = {
   restartGameBtn: el('restartGameBtn'),
   playAgainBtn: el('playAgainBtn'),
   pauseBtn: el('pauseBtn'),
+  touchControls: el('touchControls'),
 };
 
 const ctx = dom.canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
 const world = {
-  state: 'title', // title | playing | paused | levelComplete | gameOver | ending | win
+  state: 'title', // title | playing | paused | levelComplete | gameOver | ending | win | story | bossTaunt | nameEntry
   levelIndex: 0,
   level: null,
   player: null,
@@ -56,6 +63,10 @@ const world = {
   banner: null, // {text, sub, timer}
   deathTimer: 0,
   cutsceneTimer: 0,
+  storyBeats: [],
+  storyIndex: 0,
+  storyOnDone: null,
+  bossTaunt: null, // {name, text} while state === 'bossTaunt'
 };
 
 function loadBest() {
@@ -74,13 +85,50 @@ function saveBest(score) {
   }
 }
 
+const SCOREBOARD_KEY = 'buddyBatScoreboard.v1';
+const SCOREBOARD_SIZE = 10;
+
+function loadScoreboard() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(SCOREBOARD_KEY));
+    return Array.isArray(raw) ? raw : [];
+  } catch {
+    return [];
+  }
+}
+
+function addToScoreboard(name, score) {
+  const board = loadScoreboard();
+  board.push({ name, score });
+  board.sort((a, b) => b.score - a.score);
+  board.length = Math.min(board.length, SCOREBOARD_SIZE);
+  try {
+    localStorage.setItem(SCOREBOARD_KEY, JSON.stringify(board));
+  } catch {
+    /* storage unavailable — ignore */
+  }
+  return board;
+}
+
+function renderScoreboard(board) {
+  dom.scoreboardList.innerHTML = '';
+  board.forEach((entry, i) => {
+    const row = document.createElement('div');
+    row.className = 'scoreboard-row';
+    row.textContent = `${i + 1}. ${entry.name} — ${entry.score}`;
+    dom.scoreboardList.appendChild(row);
+  });
+}
+
+const OVERLAY_KEYS = ['title', 'instructions', 'pause', 'levelComplete', 'gameOver', 'win', 'nameEntry'];
+
 function showOverlay(name) {
-  for (const key of ['title', 'instructions', 'pause', 'levelComplete', 'gameOver', 'win']) {
+  for (const key of OVERLAY_KEYS) {
     dom[key].classList.toggle('hidden', key !== name);
   }
 }
 function hideAllOverlays() {
-  for (const key of ['title', 'instructions', 'pause', 'levelComplete', 'gameOver', 'win']) {
+  for (const key of OVERLAY_KEYS) {
     dom[key].classList.add('hidden');
   }
 }
@@ -106,6 +154,30 @@ function spawnConfetti(layer, count = 46) {
       piece.style.height = '7px';
     }
     layer.appendChild(piece);
+  }
+}
+
+/** Play a click-through sequence of story beats, then call onDone. Freezes
+ * gameplay (or plays before any level is loaded, for the opening cutscene) —
+ * see the 'story' branch in update()/render(). */
+function playStory(beats, onDone) {
+  if (!beats || beats.length === 0) {
+    onDone();
+    return;
+  }
+  world.storyBeats = beats;
+  world.storyIndex = 0;
+  world.storyOnDone = onDone;
+  world.state = 'story';
+}
+
+function advanceStory() {
+  world.storyIndex += 1;
+  if (world.storyIndex >= world.storyBeats.length) {
+    const cb = world.storyOnDone;
+    world.storyBeats = [];
+    world.storyOnDone = null;
+    if (cb) cb();
   }
 }
 
@@ -152,15 +224,22 @@ function retryCurrentLevel() {
   loadLevel(world.levelIndex, true);
 }
 
-function goToNextLevelOrEnding() {
-  if (world.levelIndex >= LEVELS.length - 1) {
-    startEndingCutscene();
-  } else {
-    world.levelIndex += 1;
-    loadLevel(world.levelIndex, true);
-    hideAllOverlays();
-    world.state = 'playing';
-  }
+/** After a level's win screen: play that level's "after" story beats plus
+ * the next level's "before" title card (if any), then actually advance. */
+function advanceToNextLevelOrEnding() {
+  const finishedIndex = world.levelIndex;
+  const isLast = finishedIndex >= LEVELS.length - 1;
+  const beats = [...(STORY_AFTER[finishedIndex] || []), ...(isLast ? [] : STORY_BEFORE[finishedIndex + 1] || [])];
+  hideAllOverlays();
+  playStory(beats, () => {
+    if (isLast) {
+      startEndingCutscene();
+    } else {
+      world.levelIndex += 1;
+      loadLevel(world.levelIndex, true);
+      world.state = 'playing';
+    }
+  });
 }
 
 function startEndingCutscene() {
@@ -173,6 +252,17 @@ function startEndingCutscene() {
 
 function finishEndingCutscene() {
   saveBest(world.player.score);
+  dom.nameEntryScore.textContent = `FINAL SCORE: ${world.player.score}`;
+  dom.nameInput.value = '';
+  showOverlay('nameEntry');
+  world.state = 'nameEntry';
+  dom.nameInput.focus();
+}
+
+function submitScore() {
+  const name = (dom.nameInput.value || 'BUDDY').trim().slice(0, 12).toUpperCase() || 'BUDDY';
+  const board = addToScoreboard(name, world.player.score);
+  renderScoreboard(board);
   dom.winScore.textContent = `FINAL SCORE: ${world.player.score}`;
   showOverlay('win');
   world.state = 'win';
@@ -219,6 +309,23 @@ function update(dt) {
     return;
   }
 
+  if (world.state === 'story') {
+    if (consumeSwing() || consumeJump()) {
+      sfx.uiSelect();
+      advanceStory();
+    }
+    return;
+  }
+  if (world.state === 'bossTaunt') {
+    if (consumeSwing() || consumeJump()) {
+      sfx.uiSelect();
+      world.boss.introDone = true;
+      world.bossTaunt = null;
+      world.state = 'playing';
+    }
+    return;
+  }
+
   if (world.state === 'playing') updatePlaying(dt);
   else if (world.state === 'ending') updateEnding(dt);
 }
@@ -244,9 +351,16 @@ function updatePlaying(dt) {
 
   player.update(dt, Input, level.width, level.platforms);
 
-  // Boss arena entry banner (only while boss still alive & not yet triggered)
+  // Boss arena entry: bosses with a signature taunt get a click-through
+  // dialogue box (frozen gameplay behind it); the rest keep the quick
+  // auto-dismissing "BOSS BATTLE!" banner.
   if (world.boss.alive && !world.boss.arenaBannerShown && player.x + player.w > level.arena.minX) {
     world.boss.arenaBannerShown = true;
+    if (world.boss.cfg.taunt) {
+      world.bossTaunt = { name: world.boss.name, text: world.boss.cfg.taunt };
+      world.state = 'bossTaunt';
+      return;
+    }
     setBanner(world.boss.name.toUpperCase(), 'BOSS BATTLE!', 1.8, () => {
       world.boss.introDone = true;
     });
@@ -405,14 +519,26 @@ function updateEnding(dt) {
 function render() {
   ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
+  // The movement/jump/pause buttons only make sense during actual gameplay —
+  // hide them for cutscenes, boss taunts, and the ending/name-entry/win
+  // sequence so they don't sit on top of the dialogue box or cutscene art.
+  const hudVisible = world.state === 'playing';
+  dom.pauseBtn.hidden = !hudVisible;
+  dom.touchControls.hidden = !hudVisible;
+
   if (world.state === 'title' || world.state === 'instructions') {
     drawBackground(ctx, LEVELS[0], 0, world.tick, TITLE_LIGHTING);
     drawAmbientAtmosphereOverlay(ctx, TITLE_LIGHTING);
     return;
   }
 
-  if (world.state === 'ending' || world.state === 'win') {
+  if (world.state === 'ending' || world.state === 'win' || world.state === 'nameEntry') {
     renderEnding();
+    return;
+  }
+
+  if (world.state === 'story') {
+    renderStoryBeat(ctx, world.storyBeats[world.storyIndex], world.tick);
     return;
   }
 
@@ -426,8 +552,8 @@ function render() {
   drawEntityShadows(ctx, shadowCasters, camX, lighting);
 
   for (const pk of world.pickups) pk.draw(ctx, camX);
-  for (const en of world.enemies) en.draw(ctx, camX);
-  world.boss.draw(ctx, camX);
+  for (const en of world.enemies) en.draw(ctx, camX, world.tick);
+  world.boss.draw(ctx, camX, world.tick);
   for (const pr of world.projectiles) pr.draw(ctx, camX);
   player.draw(ctx, camX, world.tick);
 
@@ -437,6 +563,9 @@ function render() {
   drawBossHealthBar();
   drawHud();
   drawBanner();
+  if (world.state === 'bossTaunt' && world.bossTaunt) {
+    renderBossTaunt(ctx, world.bossTaunt, world.tick);
+  }
 }
 
 function drawPlatforms(level, camX) {
@@ -571,7 +700,10 @@ function initUI() {
 
   dom.beginPlayBtn.addEventListener('click', () => {
     sfx.uiSelect();
-    startNewGame();
+    hideAllOverlays();
+    playStory([...STORY_INTRO, ...(STORY_BEFORE[0] || [])], () => {
+      startNewGame();
+    });
   });
 
   dom.muteBtn.addEventListener('click', () => {
@@ -600,7 +732,7 @@ function initUI() {
   dom.nextLevelBtn.addEventListener('click', () => {
     sfx.uiSelect();
     world.levelWinTriggered = false;
-    goToNextLevelOrEnding();
+    advanceToNextLevelOrEnding();
   });
 
   dom.retryLevelBtn.addEventListener('click', () => {
@@ -620,6 +752,17 @@ function initUI() {
     sfx.uiSelect();
     world.levelWinTriggered = false;
     startNewGame();
+  });
+
+  dom.saveScoreBtn.addEventListener('click', () => {
+    sfx.uiSelect();
+    submitScore();
+  });
+  dom.nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      sfx.uiSelect();
+      submitScore();
+    }
   });
 
   dom.pauseBtn.addEventListener('click', () => {

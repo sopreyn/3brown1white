@@ -207,6 +207,56 @@ html, body {
   transform: translateY(3px);
 }
 
+.pixel-input {
+  font-family: inherit;
+  font-size: clamp(10px, 2.6vw, 14px);
+  color: var(--bats-white);
+  background: #1a1a22;
+  border: 2px solid var(--bats-white);
+  border-radius: 3px;
+  padding: 10px 14px;
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  width: min(220px, 70%);
+}
+
+.pixel-input:focus {
+  outline: none;
+  border-color: var(--bats-red);
+}
+
+.scoreboard {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 10px 16px;
+  max-width: 92%;
+  min-width: 200px;
+  margin: 2px 0 4px;
+}
+
+.scoreboard-title {
+  margin: 2px 0 8px;
+  font-size: clamp(8px, 2vw, 10px);
+  color: #d8b8c0;
+}
+
+.scoreboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 110px;
+  overflow-y: auto;
+}
+
+.scoreboard-row {
+  font-size: clamp(7px, 1.8vw, 9px);
+  color: #ffd76a;
+  text-align: left;
+  font-family: 'Courier New', monospace;
+}
+
 .pixel-btn.small {
   font-size: clamp(7px, 1.8vw, 10px);
   background: #2a2a33;

@@ -255,9 +255,9 @@ export const ENEMY_TYPES = {
     damage: 1,
     points: 100,
   },
-  redsplayer: {
-    frames: [S.REDS_FRAMES.walk1, S.REDS_FRAMES.walk2],
-    palette: S.REDS_PALETTE,
+  clippersplayer: {
+    frames: [S.CLIPPERS_FRAMES.walk1, S.CLIPPERS_FRAMES.walk2],
+    palette: S.CLIPPERS_PALETTE,
     w: 16,
     h: 24,
     speed: 30,
@@ -310,6 +310,7 @@ export const BOSS_TYPES = {
     points: 1200,
     override: S.WORKER_BOSS_OVERRIDE,
     attack: 'throw_wrench',
+    taunt: 'I WILL DEFEAT YOU BUDDY THE BAT. THIS LARGE BAT IS OURS AND OURS ALONE.',
   },
   jogger_boss: {
     base: 'jogger',
@@ -321,6 +322,7 @@ export const BOSS_TYPES = {
     points: 1200,
     override: S.JOGGER_BOSS_OVERRIDE,
     attack: 'dash',
+    taunt: "NO ONE'S RUNNING SHORTS ARE SHORTER THAN MINE!!",
   },
   suit_boss: {
     base: 'suit',
@@ -332,6 +334,7 @@ export const BOSS_TYPES = {
     points: 1400,
     override: S.SUIT_BOSS_OVERRIDE,
     attack: 'throw_briefcase',
+    taunt: 'REVENUE!!!!!',
   },
   butcher_boss: {
     base: 'suit',
@@ -343,10 +346,11 @@ export const BOSS_TYPES = {
     points: 1500,
     override: { s: '#e8e2d3', f: '#d99a66' }, // butcher's apron over the suit
     attack: 'throw_ham',
+    taunt: 'OINK',
   },
   mascot_boss: {
     base: 'mascot',
-    name: 'Rowdy the Riverboat',
+    name: 'Cappy the Clipper',
     scale: 2.4,
     hp: 32,
     damage: 1,
@@ -383,6 +387,7 @@ export class Enemy {
     this.bounceT = Math.random() * 10;
     this.justDied = false;
     this.contactCooldown = 0;
+    this.stunTimer = 0;
   }
 
   takeDamage(amount) {
@@ -392,6 +397,8 @@ export class Enemy {
       this.alive = false;
       this.justDied = true;
       this.deathTimer = 0.35;
+    } else {
+      this.stunTimer = 0.5;
     }
   }
 
@@ -402,6 +409,7 @@ export class Enemy {
     }
     if (this.hurtFlash > 0) this.hurtFlash -= dt;
     if (this.contactCooldown > 0) this.contactCooldown -= dt;
+    if (this.stunTimer > 0) this.stunTimer -= dt;
 
     const chaseRange = 70;
     const dx = playerX - this.x;
@@ -433,7 +441,7 @@ export class Enemy {
     return this.y;
   }
 
-  draw(ctx, camX) {
+  draw(ctx, camX, tick = 0) {
     if (!this.alive && this.deathTimer <= 0) return;
     const frame = this.cfg.frames[this.frameIdx];
     const alpha = this.alive ? 1 : Math.max(0, this.deathTimer / 0.35);
@@ -443,6 +451,9 @@ export class Enemy {
       overrides,
       alpha,
     });
+    if (this.alive && this.stunTimer > 0) {
+      S.drawDazeStars(ctx, this.x - camX + this.w / 2, this.drawY - 4, tick);
+    }
   }
 }
 
@@ -484,6 +495,7 @@ export class Boss {
     this.projectileRequest = null; // set during update, consumed by game.js
     this.introDone = false;
     this.arenaBannerShown = false;
+    this.stunTimer = 0;
   }
 
   takeDamage(amount) {
@@ -493,6 +505,8 @@ export class Boss {
       this.alive = false;
       this.justDied = true;
       this.deathTimer = 0.6;
+    } else {
+      this.stunTimer = 0.4;
     }
   }
 
@@ -504,6 +518,7 @@ export class Boss {
     }
     if (this.hurtFlash > 0) this.hurtFlash -= dt;
     if (this.contactCooldown > 0) this.contactCooldown -= dt;
+    if (this.stunTimer > 0) this.stunTimer -= dt;
     if (!this.introDone) return; // held in place until the intro banner clears
 
     const dx = playerX - (this.x + this.w / 2);
@@ -557,7 +572,7 @@ export class Boss {
     return this.y;
   }
 
-  draw(ctx, camX) {
+  draw(ctx, camX, tick = 0) {
     if (!this.alive && this.deathTimer <= 0) return;
     const frame = this.baseCfg.frames[this.frameIdx];
     const alpha = this.alive ? 1 : Math.max(0, this.deathTimer / 0.6);
@@ -570,6 +585,9 @@ export class Boss {
       overrides,
       alpha,
     });
+    if (this.alive && this.introDone && this.stunTimer > 0) {
+      S.drawDazeStars(ctx, this.x - camX + this.w / 2, this.drawY - 6, tick, 4);
+    }
   }
 }
 
