@@ -330,62 +330,6 @@ export function drawSkyAndCelestial(ctx, lighting, tick) {
   }
 }
 
-/** Soft ground shadows under player/enemies/boss/pickups — multi-source
- * cross-shadows under stadium floodlights, a single directional shadow
- * otherwise. */
-export function drawEntityShadows(ctx, entities, camX, lighting) {
-  ctx.save();
-
-  if (lighting.stadiumLightsOn && lighting.stadiumLightIntensity > 0.4) {
-    const lightSources = [
-      { x: 60, intensity: 0.35 * lighting.stadiumLightIntensity },
-      { x: 240, intensity: 0.4 * lighting.stadiumLightIntensity },
-      { x: 420, intensity: 0.35 * lighting.stadiumLightIntensity },
-    ];
-
-    for (const ent of entities) {
-      if (!ent || ent.alive === false || ent.collected) continue;
-      const screenX = ent.x - camX + ent.w / 2;
-      const footY = Math.min(GROUND_Y, ent.y + ent.h);
-      if (screenX < -50 || screenX > GAME_WIDTH + 50) continue;
-
-      for (const light of lightSources) {
-        const dx = screenX - light.x;
-        const shadowOffset = Math.max(-28, Math.min(28, dx * 0.14));
-        const shadowW = ent.w * 0.9 + Math.abs(shadowOffset) * 0.4;
-        const shadowH = 3.5;
-
-        ctx.fillStyle = `rgba(10, 10, 20, ${light.intensity * lighting.shadowOpacity})`;
-        ctx.beginPath();
-        ctx.ellipse(screenX + shadowOffset, footY + 1, shadowW / 2, shadowH / 2, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  } else {
-    const length = Math.max(0.3, lighting.shadowLength);
-    const angle = lighting.shadowAngle;
-    const alpha = lighting.shadowOpacity;
-
-    for (const ent of entities) {
-      if (!ent || ent.alive === false || ent.collected) continue;
-      const screenX = ent.x - camX + ent.w / 2;
-      const footY = Math.min(GROUND_Y, ent.y + ent.h);
-      if (screenX < -60 || screenX > GAME_WIDTH + 60) continue;
-
-      const shadowOffsetX = angle * 40 * length;
-      const shadowW = ent.w * (0.8 + length * 0.4);
-      const shadowH = 3 + length * 1.2;
-
-      ctx.fillStyle = `rgba(12, 12, 22, ${alpha * 0.8})`;
-      ctx.beginPath();
-      ctx.ellipse(screenX + shadowOffsetX, footY + 1, shadowW / 2, shadowH / 2, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  ctx.restore();
-}
-
 /** Volumetric stadium floodlight beams + lens flares, when lights are on. */
 export function drawStadiumFloodlightBeams(ctx, lighting, camX, tick) {
   if (!lighting.stadiumLightsOn || lighting.stadiumLightIntensity <= 0.05) return;

@@ -25,6 +25,7 @@ const MUSIC_TRACKS = {
   2: 'assets/music/violet-interiors.mp3',
   3: 'assets/music/in-a-shed.mp3',
   4: 'assets/music/the-beef-boy.mp3',
+  ending: 'assets/music/ending.mp3',
 };
 
 let music = null;
@@ -59,6 +60,11 @@ export function startMusic() {
  * back to the main theme if that level has no dedicated track yet). */
 export function playLevelMusic(levelId) {
   playTrack(MUSIC_TRACKS[levelId] ? levelId : 'theme');
+}
+
+/** Switch to the ending/credits song for the win cutscene. */
+export function playEndingMusic() {
+  playTrack('ending');
 }
 
 export function setMuted(value) {

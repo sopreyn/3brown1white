@@ -454,6 +454,12 @@ export class Enemy {
     if (this.alive && this.stunTimer > 0) {
       S.drawDazeStars(ctx, this.x - camX + this.w / 2, this.drawY - 4, tick);
     }
+    if (this.alive && this.type === 'suit') {
+      // A briefcase swinging in the trailing hand as the businessman walks.
+      const caseX = this.x - camX + (this.facing === 1 ? -8 : this.w - 4);
+      const caseY = this.drawY + 12 + (this.frameIdx === 0 ? 0 : 1);
+      S.drawSprite(ctx, 'suitcase', S.BRIEFCASE_GRID, S.BRIEFCASE_PALETTE, caseX, caseY, {});
+    }
   }
 }
 

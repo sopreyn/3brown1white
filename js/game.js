@@ -3,8 +3,8 @@ import { Player, Enemy, Boss, Pickup, Projectile, aabb, drawFireHazard } from '.
 import { LEVELS, drawBackground, drawEndingBackground, drawBridgeForegroundBeams } from './levels.js';
 import * as S from './sprites.js';
 import { Input, setupInput, consumeJump, consumeSwing, consumePause } from './input.js';
-import { sfx, resumeAudio, setMuted, isMuted, startMusic, playLevelMusic } from './audio.js';
-import { computeLighting, drawEntityShadows, drawAmbientAtmosphereOverlay } from './lighting.js';
+import { sfx, resumeAudio, setMuted, isMuted, startMusic, playLevelMusic, playEndingMusic } from './audio.js';
+import { computeLighting, drawAmbientAtmosphereOverlay } from './lighting.js';
 import { STORY_INTRO, STORY_BEFORE, STORY_AFTER, renderStoryBeat, renderBossTaunt } from './story.js';
 
 // Title screen reuses level 1's background at its "story cycle" time of day.
@@ -246,7 +246,7 @@ function startEndingCutscene() {
   world.state = 'ending';
   world.cutsceneTimer = 0;
   hideAllOverlays();
-  startMusic();
+  playEndingMusic();
   sfx.win();
 }
 
@@ -547,9 +547,6 @@ function render() {
   drawBackground(ctx, level, camX, world.tick, lighting);
   drawPlatforms(level, camX);
   for (const hz of level.hazards) drawFireHazard(ctx, hz, camX, world.tick);
-
-  const shadowCasters = [player, ...world.enemies, world.boss, ...world.pickups.filter((p) => !p.collected)];
-  drawEntityShadows(ctx, shadowCasters, camX, lighting);
 
   for (const pk of world.pickups) pk.draw(ctx, camX);
   for (const en of world.enemies) en.draw(ctx, camX, world.tick);
