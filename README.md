@@ -25,6 +25,13 @@ Each level is a bit longer than the last, and Buddy's max HP goes up by one
 every level (6 → 10). Beat the final boss and watch Buddy fly off into a
 sunset "YOU WON!" ending.
 
+Each level also has its own moment in the story's day — a dynamic
+time-of-day lighting system (`js/lighting.js`) drives the sky/sun/moon,
+window and streetlamp glow, entity shadows, and stadium floodlights, so
+the game visually progresses from a sunny afternoon opener through a
+golden-hour sunset on the bridge to a Friday-night away game under the
+lights in Cincinnati.
+
 ## Controls
 
 | Action | Desktop | Mobile |
@@ -73,7 +80,8 @@ js/constants.js       All the tunable numbers (physics, timings, sizes)
 js/sprites.js         Original 8-bit pixel art, authored as ASCII grids + a tiny renderer
 js/audio.js           Synthesized 8-bit sound effects (Web Audio, no audio files)
 js/entities.js        Player, Enemy, Boss, Pickup, Projectile classes
-js/levels.js          The 5 level definitions + procedurally drawn parallax backgrounds
+js/levels.js          The 5 level definitions + landmark-styled parallax backgrounds
+js/lighting.js         Time-of-day presets, sun/moon, shadows, stadium floodlights
 js/input.js            Keyboard + touch input, unified
 js/game.js             State machine, game loop, collisions, HUD, UI wiring
 js/main.js             Bootstraps the game + registers the service worker

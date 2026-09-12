@@ -1,6 +1,6 @@
 // Minimal offline cache so Buddy the Bat keeps working once it's been loaded
 // (handy for a "installed to home screen" mobile play session).
-const CACHE_NAME = 'buddy-the-bat-v4';
+const CACHE_NAME = 'buddy-the-bat-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -18,6 +18,7 @@ const ASSETS = [
   './js/input.js',
   './js/entities.js',
   './js/levels.js',
+  './js/lighting.js',
 ];
 
 self.addEventListener('install', (event) => {

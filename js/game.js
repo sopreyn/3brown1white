@@ -4,6 +4,10 @@ import { LEVELS, drawBackground, drawEndingBackground } from './levels.js';
 import * as S from './sprites.js';
 import { Input, setupInput, consumeJump, consumeSwing, consumePause } from './input.js';
 import { sfx, resumeAudio, setMuted, isMuted } from './audio.js';
+import { computeLighting, drawEntityShadows, drawAmbientAtmosphereOverlay } from './lighting.js';
+
+// Title screen reuses level 1's background at its "story cycle" time of day.
+const TITLE_LIGHTING = computeLighting('cycle', 1);
 
 const el = (id) => document.getElementById(id);
 
@@ -45,6 +49,7 @@ const world = {
   projectiles: [],
   camX: 0,
   tick: 0,
+  lighting: TITLE_LIGHTING,
   banner: null, // {text, sub, timer}
   deathTimer: 0,
   cutsceneTimer: 0,
@@ -92,6 +97,7 @@ function startNewGame() {
 function loadLevel(index, resetPosition) {
   const level = LEVELS[index];
   world.level = level;
+  world.lighting = computeLighting('cycle', level.id);
   world.camX = 0;
   world.enemies = level.enemySpawns.map((s) => new Enemy(s.type, s.x, s.x - 90, s.x + 90));
   world.boss = new Boss(level.bossKey, level.bossX, level.arena.minX, level.arena.maxX);
@@ -363,7 +369,8 @@ function render() {
   ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
   if (world.state === 'title') {
-    drawBackground(ctx, LEVELS[0], 0, world.tick);
+    drawBackground(ctx, LEVELS[0], 0, world.tick, TITLE_LIGHTING);
+    drawAmbientAtmosphereOverlay(ctx, TITLE_LIGHTING);
     return;
   }
 
@@ -373,15 +380,20 @@ function render() {
   }
 
   if (!world.level) return;
-  const { level, camX, player } = world;
-  drawBackground(ctx, level, camX, world.tick);
+  const { level, camX, player, lighting } = world;
+  drawBackground(ctx, level, camX, world.tick, lighting);
   drawPlatforms(level, camX);
+
+  const shadowCasters = [player, ...world.enemies, world.boss, ...world.pickups.filter((p) => !p.collected)];
+  drawEntityShadows(ctx, shadowCasters, camX, lighting);
 
   for (const pk of world.pickups) pk.draw(ctx, camX);
   for (const en of world.enemies) en.draw(ctx, camX);
   world.boss.draw(ctx, camX);
   for (const pr of world.projectiles) pr.draw(ctx, camX);
   player.draw(ctx, camX, world.tick);
+
+  drawAmbientAtmosphereOverlay(ctx, lighting);
 
   drawBossHealthBar();
   drawHud();
@@ -591,4 +603,11 @@ export function initGame() {
   // Harmless debug hook — lets anyone poke at live state from devtools.
   window.__buddyDebug = world;
   window.__buddyInput = Input;
+  window.__buddyLoadLevel = (i) => {
+    if (!world.player) world.player = new Player(40, GROUND_Y - 18, LEVELS[i].maxHp);
+    world.levelIndex = i;
+    loadLevel(i, true);
+    hideAllOverlays();
+    world.state = 'playing';
+  };
 }
