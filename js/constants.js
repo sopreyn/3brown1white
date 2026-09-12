@@ -36,4 +36,4 @@ export const STORAGE_KEY = 'buddyBatSave.v1';
 // level to see the art/lighting without having to fight. Swinging still
 // damages them as normal, so bosses can still be beaten to advance levels.
 // Left false on the real game; flipped to true on testing-branch only.
-export const PEACEFUL_MODE = false;
+export const PEACEFUL_MODE = true;
