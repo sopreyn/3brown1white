@@ -1,4 +1,4 @@
-import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, FIRE_HAZARD_W, FIRE_HAZARD_H } from './constants.js';
+import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, FIRE_HAZARD_W, FIRE_HAZARD_H, MEAT_HAZARD_W, MEAT_HAZARD_H } from './constants.js';
 import { drawSkyAndCelestial, drawStadiumFloodlightBeams } from './lighting.js';
 
 // ---------------------------------------------------------------------------
@@ -1000,12 +1000,22 @@ function buildLevel(cfg) {
     pickupSpawns.push({ kind: 'bat', x: bossArenaStart + 60, y: GROUND_Y - 50 });
   }
 
-  const hazards = (cfg.hazardXs || []).map((x) => ({
-    x,
-    y: GROUND_Y - FIRE_HAZARD_H,
-    w: FIRE_HAZARD_W,
-    h: FIRE_HAZARD_H,
-  }));
+  const hazards = [
+    ...(cfg.hazardXs || []).map((x) => ({
+      x,
+      y: GROUND_Y - FIRE_HAZARD_H,
+      w: FIRE_HAZARD_W,
+      h: FIRE_HAZARD_H,
+      type: 'fire',
+    })),
+    ...(cfg.meatHazardXs || []).map((x) => ({
+      x,
+      y: GROUND_Y - MEAT_HAZARD_H,
+      w: MEAT_HAZARD_W,
+      h: MEAT_HAZARD_H,
+      type: 'meat',
+    })),
+  ];
 
   return {
     id: cfg.id,
@@ -1112,6 +1122,7 @@ export const LEVELS = [
     bugCount: 7,
     goldBugCount: 2,
     bossKey: 'butcher_boss',
+    meatHazardXs: [800, 1300, 1900, 2700, 3550],
     platforms: [
       { x: 490, y: GROUND_Y - 40, w: 80 },
       { x: 1080, y: GROUND_Y - 50, w: 60 },

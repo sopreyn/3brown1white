@@ -33,7 +33,11 @@ export const STORAGE_KEY = 'buddyBatSave.v1';
 
 export const FIRE_HAZARD_W = 30; // ground-fire patch width — jumpable, not walkable-over
 export const FIRE_HAZARD_H = 24; // comfortably under the ~37px max jump rise
-export const FIRE_HAZARD_DAMAGE = 1;
+
+export const MEAT_HAZARD_W = 34; // Butchertown meat-pile width — jumpable, not walkable-over
+export const MEAT_HAZARD_H = 20; // comfortably under the ~37px max jump rise
+
+export const HAZARD_DAMAGE = 1; // shared by every ground-hazard type (fire, meat, ...)
 
 // When true, enemies/boss/projectiles are still there and animate normally,
 // but can't damage the player on contact — lets you walk straight through a

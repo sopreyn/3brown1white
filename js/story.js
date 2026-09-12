@@ -15,6 +15,7 @@ import { computeLighting } from './lighting.js';
 import * as S from './sprites.js';
 
 const STADIUM_LIGHTING = computeLighting('cycle', 1);
+const DOWNTOWN_LIGHTING = computeLighting('cycle', 4);
 
 // ---------------------------------------------------------------------------
 // A generic little pixel-art ballplayer, used for the "team photo" scenes.
@@ -234,12 +235,42 @@ function scBuddyPortrait(ctx, tick, opts = {}) {
   }
 }
 
+function scMayor(ctx, tick) {
+  drawBackground(ctx, LEVELS[3], 0, tick, DOWNTOWN_LIGHTING);
+  ctx.save();
+  ctx.fillStyle = 'rgba(10, 6, 14, 0.35)';
+  ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+  ctx.restore();
+
+  // A generic besuited figure with a ceremonial sash — not any real person,
+  // just "the current mayor of Louisville."
+  const mayorX = GAME_WIDTH / 2 + 22;
+  const mayorY = 150;
+  S.drawSprite(ctx, 'mayor', S.SUIT_FRAMES.walk1, S.SUIT_PALETTE, mayorX, mayorY, {
+    pixelSize: 4,
+    overrides: { h: '#c9c9c9', t: '#ffd76a' },
+  });
+  ctx.save();
+  ctx.translate(mayorX + 16, mayorY + 26);
+  ctx.rotate(-0.55);
+  ctx.fillStyle = '#2255aa';
+  ctx.fillRect(-4, -26, 8, 52);
+  ctx.fillStyle = '#ffd76a';
+  ctx.fillRect(-4, -3, 8, 4);
+  ctx.restore();
+
+  // Buddy, receiving the congratulations
+  const bob = Math.sin(tick * 2.2) * 1.5;
+  S.drawPlayerImage(ctx, S.getPlayerImage(), mayorX - 78, mayorY - 4 + bob, 46, 40, { flip: true });
+}
+
 const SCENES = {
   cave: scCave,
   stadiumInvaded: scStadiumInvaded,
   teamPhoto: scTeamPhoto,
   copScene: scCopScene,
   buddyPortrait: scBuddyPortrait,
+  mayor: scMayor,
 };
 
 // ---------------------------------------------------------------------------
@@ -386,6 +417,13 @@ export const STORY_AFTER = {
       scene: 'teamPhoto',
       speaker: 'THE LOUISVILLE BATS',
       text: 'Now we have to defeat our main rivals, the Columbus Clippers!',
+    },
+  ],
+  5: [
+    {
+      scene: 'mayor',
+      speaker: 'CURRENT MAYOR OF LOUISVILLE',
+      text: "Congratulations, Buddy! You've saved the season for the Louisville Bats — the whole city thanks you!",
     },
   ],
 };

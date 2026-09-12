@@ -1,5 +1,5 @@
-import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, STORAGE_KEY, PEACEFUL_MODE, FIRE_HAZARD_DAMAGE } from './constants.js';
-import { Player, Enemy, Boss, Pickup, Projectile, aabb, drawFireHazard } from './entities.js';
+import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, STORAGE_KEY, PEACEFUL_MODE, HAZARD_DAMAGE } from './constants.js';
+import { Player, Enemy, Boss, Pickup, Projectile, aabb, drawFireHazard, drawMeatHazard } from './entities.js';
 import { LEVELS, drawBackground, drawEndingBackground, drawBridgeForegroundBeams } from './levels.js';
 import * as S from './sprites.js';
 import { Input, setupInput, consumeJump, consumeSwing, consumePause } from './input.js';
@@ -268,9 +268,11 @@ function submitScore() {
   world.state = 'win';
 }
 
-function spawnBossProjectile(boss, kind, player) {
-  const bx = boss.x + boss.w / 2;
-  const by = boss.y + boss.h * 0.35;
+/** Spawns a thrown projectile from any entity with x/y/w/h — a boss's
+ * signature attack, or a small enemy's ranged throw (away-game players). */
+function spawnThrownProjectile(thrower, kind, player) {
+  const bx = thrower.x + thrower.w / 2;
+  const by = thrower.y + thrower.h * 0.35;
   const px = player.x + player.w / 2;
   const py = player.y + player.h / 2;
   const dirX = px - bx;
@@ -366,12 +368,17 @@ function updatePlaying(dt) {
     });
   }
 
-  for (const en of world.enemies) en.update(dt, player.x + player.w / 2);
+  for (const en of world.enemies) {
+    en.update(dt, player.x + player.w / 2);
+    if (en.projectileRequest) {
+      spawnThrownProjectile(en, en.projectileRequest, player);
+    }
+  }
   world.enemies = world.enemies.filter((en) => en.alive || en.deathTimer > 0);
 
   world.boss.update(dt, player.x + player.w / 2);
   if (world.boss.projectileRequest) {
-    spawnBossProjectile(world.boss, world.boss.projectileRequest, player);
+    spawnThrownProjectile(world.boss, world.boss.projectileRequest, player);
   }
 
   for (const pk of world.pickups) pk.update(dt);
@@ -478,10 +485,10 @@ function resolveCollisions() {
         if (player.takeDamage(pr.damage, pr.x)) sfx.hurt();
       }
     }
-    // Fire hazards — jump over them
+    // Ground hazards (fire, meat piles, ...) — jump over them
     for (const hz of level.hazards) {
       if (aabb(player, hz)) {
-        if (player.takeDamage(FIRE_HAZARD_DAMAGE, hz.x + hz.w / 2)) sfx.hurt();
+        if (player.takeDamage(HAZARD_DAMAGE, hz.x + hz.w / 2)) sfx.hurt();
       }
     }
   }
@@ -546,7 +553,10 @@ function render() {
   const { level, camX, player, lighting } = world;
   drawBackground(ctx, level, camX, world.tick, lighting);
   drawPlatforms(level, camX);
-  for (const hz of level.hazards) drawFireHazard(ctx, hz, camX, world.tick);
+  for (const hz of level.hazards) {
+    if (hz.type === 'meat') drawMeatHazard(ctx, hz, camX, world.tick);
+    else drawFireHazard(ctx, hz, camX, world.tick);
+  }
 
   for (const pk of world.pickups) pk.draw(ctx, camX);
   for (const en of world.enemies) en.draw(ctx, camX, world.tick);

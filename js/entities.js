@@ -264,6 +264,9 @@ export const ENEMY_TYPES = {
     hp: 2,
     damage: 1,
     points: 100,
+    ranged: true, // the away team pelts Buddy with baseballs from a distance
+    throwCooldown: 2.3,
+    throwRange: 220,
   },
   mascot: {
     // boss-only base stats — no small "mascot" enemy spawns in the level
@@ -388,6 +391,8 @@ export class Enemy {
     this.justDied = false;
     this.contactCooldown = 0;
     this.stunTimer = 0;
+    this.projectileRequest = null; // set during update, consumed by game.js
+    this.throwTimer = cfg.ranged ? 1 + Math.random() * 1.2 : 0;
   }
 
   takeDamage(amount) {
@@ -403,6 +408,7 @@ export class Enemy {
   }
 
   update(dt, playerX) {
+    this.projectileRequest = null;
     if (!this.alive) {
       this.deathTimer -= dt;
       return;
@@ -410,6 +416,19 @@ export class Enemy {
     if (this.hurtFlash > 0) this.hurtFlash -= dt;
     if (this.contactCooldown > 0) this.contactCooldown -= dt;
     if (this.stunTimer > 0) this.stunTimer -= dt;
+
+    if (this.cfg.ranged) {
+      this.throwTimer -= dt;
+      if (this.throwTimer <= 0) {
+        const dist = Math.abs(playerX - (this.x + this.w / 2));
+        if (dist > 30 && dist < this.cfg.throwRange) {
+          this.projectileRequest = 'throw_ball';
+          this.throwTimer = this.cfg.throwCooldown + Math.random() * 0.8;
+        } else {
+          this.throwTimer = 0.4;
+        }
+      }
+    }
 
     const chaseRange = 70;
     const dx = playerX - this.x;
@@ -763,6 +782,53 @@ export function drawFireHazard(ctx, hazard, camX, tick) {
   }
   ctx.fillStyle = 'rgba(20, 12, 8, 0.6)';
   ctx.fillRect(x, baseY - 2, hazard.w, 3);
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
+// Meat piles (Butchertown ground obstacles — jump over them, flies included)
+// ---------------------------------------------------------------------------
+
+const MEAT_CHUNK_COLORS = ['#a8433c', '#c1594f', '#d97a6a'];
+
+export function drawMeatHazard(ctx, hazard, camX, tick) {
+  const x = hazard.x - camX;
+  if (x + hazard.w < -10 || x > GAME_WIDTH + 10) return;
+  const baseY = hazard.y + hazard.h;
+  ctx.save();
+
+  // stain on the ground beneath the pile
+  ctx.fillStyle = 'rgba(110, 20, 20, 0.35)';
+  ctx.beginPath();
+  ctx.ellipse(x + hazard.w / 2, baseY, hazard.w * 0.55, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // stacked meat chunks, each a little smaller/lighter than the one below
+  for (let i = 0; i < 3; i++) {
+    const cw = hazard.w * (0.78 - i * 0.14);
+    const ch = hazard.h * 0.4;
+    const cx = x + (hazard.w - cw) / 2;
+    const cy = baseY - (i + 0.9) * (hazard.h * 0.32);
+    ctx.fillStyle = MEAT_CHUNK_COLORS[i % MEAT_CHUNK_COLORS.length];
+    ctx.beginPath();
+    ctx.ellipse(cx + cw / 2, cy, cw / 2, ch / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 235, 225, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx + cw * 0.2, cy - ch * 0.1);
+    ctx.lineTo(cx + cw * 0.7, cy + ch * 0.15);
+    ctx.stroke();
+  }
+
+  // flies circling above the pile
+  for (let i = 0; i < 3; i++) {
+    const angle = tick * 5 + i * 2.1;
+    const fx = x + hazard.w / 2 + Math.cos(angle) * (hazard.w * 0.4) - 2.5;
+    const fy = baseY - hazard.h * 1.5 + Math.sin(angle * 1.7) * 4;
+    S.drawSprite(ctx, 'meatfly' + i, S.BUG_FRAME, S.BUG_PALETTE, fx, fy, { pixelSize: 1.4 });
+  }
+
   ctx.restore();
 }
 
