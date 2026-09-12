@@ -1,5 +1,5 @@
-// Tiny synthesized 8-bit style sound effects — no audio files required, so
-// there's nothing extra to host or load on a slow mobile connection.
+// Tiny synthesized 8-bit style sound effects (no audio files needed for
+// these) plus the game's one real audio asset: a looping theme song.
 
 let ctx = null;
 let muted = false;
@@ -17,8 +17,30 @@ export function resumeAudio() {
   if (c && c.state === 'suspended') c.resume();
 }
 
+let music = null;
+function getMusic() {
+  if (!music) {
+    music = new Audio('assets/theme.mp3');
+    music.loop = true;
+    music.volume = 0.5;
+    music.preload = 'auto';
+  }
+  return music;
+}
+
+/** Start the theme song looping. Call this from a user-gesture handler —
+ * browsers block audio playback before the first tap/click. */
+export function startMusic() {
+  const m = getMusic();
+  if (!muted) m.play().catch(() => {});
+}
+
 export function setMuted(value) {
   muted = value;
+  if (music) {
+    if (muted) music.pause();
+    else music.play().catch(() => {});
+  }
 }
 
 export function isMuted() {

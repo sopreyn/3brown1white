@@ -3,7 +3,7 @@ import { Player, Enemy, Boss, Pickup, Projectile, aabb, drawFireHazard } from '.
 import { LEVELS, drawBackground, drawEndingBackground, drawBridgeForegroundBeams } from './levels.js';
 import * as S from './sprites.js';
 import { Input, setupInput, consumeJump, consumeSwing, consumePause } from './input.js';
-import { sfx, resumeAudio, setMuted, isMuted } from './audio.js';
+import { sfx, resumeAudio, setMuted, isMuted, startMusic } from './audio.js';
 import { computeLighting, drawEntityShadows, drawAmbientAtmosphereOverlay } from './lighting.js';
 
 // Title screen reuses level 1's background at its "story cycle" time of day.
@@ -561,6 +561,7 @@ function initUI() {
 
   dom.startBtn.addEventListener('click', () => {
     resumeAudio();
+    startMusic();
     sfx.uiSelect();
     showOverlay('instructions');
     world.state = 'instructions';
