@@ -1,5 +1,5 @@
-import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, STORAGE_KEY, PEACEFUL_MODE } from './constants.js';
-import { Player, Enemy, Boss, Pickup, Projectile, aabb } from './entities.js';
+import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, STORAGE_KEY, PEACEFUL_MODE, FIRE_HAZARD_DAMAGE } from './constants.js';
+import { Player, Enemy, Boss, Pickup, Projectile, aabb, drawFireHazard } from './entities.js';
 import { LEVELS, drawBackground, drawEndingBackground, drawBridgeForegroundBeams } from './levels.js';
 import * as S from './sprites.js';
 import { Input, setupInput, consumeJump, consumeSwing, consumePause } from './input.js';
@@ -14,12 +14,15 @@ const el = (id) => document.getElementById(id);
 const dom = {
   canvas: el('gameCanvas'),
   title: el('titleScreen'),
+  instructions: el('instructionsScreen'),
+  beginPlayBtn: el('beginPlayBtn'),
   pause: el('pauseScreen'),
   levelComplete: el('levelCompleteScreen'),
   gameOver: el('gameOverScreen'),
   win: el('winScreen'),
   bestScore: el('bestScore'),
   levelCompleteTitle: el('levelCompleteTitle'),
+  confettiLayer: el('confettiLayer'),
   levelCompleteScore: el('levelCompleteScore'),
   gameOverScore: el('gameOverScore'),
   winScore: el('winScore'),
@@ -72,18 +75,38 @@ function saveBest(score) {
 }
 
 function showOverlay(name) {
-  for (const key of ['title', 'pause', 'levelComplete', 'gameOver', 'win']) {
+  for (const key of ['title', 'instructions', 'pause', 'levelComplete', 'gameOver', 'win']) {
     dom[key].classList.toggle('hidden', key !== name);
   }
 }
 function hideAllOverlays() {
-  for (const key of ['title', 'pause', 'levelComplete', 'gameOver', 'win']) {
+  for (const key of ['title', 'instructions', 'pause', 'levelComplete', 'gameOver', 'win']) {
     dom[key].classList.add('hidden');
   }
 }
 
 function setBanner(text, sub, duration, onComplete) {
   world.banner = { text, sub, timer: duration, duration, onComplete };
+}
+
+const CONFETTI_COLORS = ['#c8102e', '#ffd76a', '#f5f5f0', '#5b3aa0', '#3c8546', '#7ec8ff'];
+
+function spawnConfetti(layer, count = 46) {
+  layer.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    const round = Math.random() < 0.4;
+    piece.className = round ? 'confetti-piece round' : 'confetti-piece';
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+    piece.style.animationDuration = `${1.6 + Math.random() * 1.4}s`;
+    piece.style.animationDelay = `${Math.random() * 0.5}s`;
+    if (round) {
+      piece.style.width = '7px';
+      piece.style.height = '7px';
+    }
+    layer.appendChild(piece);
+  }
 }
 
 function startNewGame() {
@@ -169,6 +192,10 @@ function spawnBossProjectile(boss, kind, player) {
     vx = Math.sign(dirX || 1) * 120;
     vy = -230;
     projKind = 'briefcase';
+  } else if (kind === 'throw_ham') {
+    vx = Math.sign(dirX || 1) * 130;
+    vy = -220;
+    projKind = 'ham';
   } else {
     vx = (dirX / dist) * 215;
     vy = (py - by) / dist * 215;
@@ -246,9 +273,9 @@ function updatePlaying(dt) {
   if (!world.levelWinTriggered && !world.boss.alive && world.boss.deathTimer <= 0) {
     world.levelWinTriggered = true;
     sfx.levelComplete();
-    const isLast = world.levelIndex >= LEVELS.length - 1;
-    dom.levelCompleteTitle.textContent = isLast ? 'FINAL BOSS DEFEATED!' : 'LEVEL COMPLETE!';
+    dom.levelCompleteTitle.textContent = `YOU BEAT ${level.name.toUpperCase()}!`;
     dom.levelCompleteScore.textContent = `SCORE: ${player.score}`;
+    spawnConfetti(dom.confettiLayer);
     showOverlay('levelComplete');
     world.state = 'levelComplete';
     return;
@@ -267,7 +294,7 @@ function updatePlaying(dt) {
 }
 
 function resolveCollisions() {
-  const { player } = world;
+  const { player, level } = world;
   const hitbox = player.getSwingHitbox();
 
   // Swing vs enemies
@@ -335,6 +362,12 @@ function resolveCollisions() {
         if (player.takeDamage(pr.damage, pr.x)) sfx.hurt();
       }
     }
+    // Fire hazards — jump over them
+    for (const hz of level.hazards) {
+      if (aabb(player, hz)) {
+        if (player.takeDamage(FIRE_HAZARD_DAMAGE, hz.x + hz.w / 2)) sfx.hurt();
+      }
+    }
   }
   // Pickups
   for (const pk of world.pickups) {
@@ -370,7 +403,7 @@ function updateEnding(dt) {
 function render() {
   ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-  if (world.state === 'title') {
+  if (world.state === 'title' || world.state === 'instructions') {
     drawBackground(ctx, LEVELS[0], 0, world.tick, TITLE_LIGHTING);
     drawAmbientAtmosphereOverlay(ctx, TITLE_LIGHTING);
     return;
@@ -385,6 +418,7 @@ function render() {
   const { level, camX, player, lighting } = world;
   drawBackground(ctx, level, camX, world.tick, lighting);
   drawPlatforms(level, camX);
+  for (const hz of level.hazards) drawFireHazard(ctx, hz, camX, world.tick);
 
   const shadowCasters = [player, ...world.enemies, world.boss, ...world.pickups.filter((p) => !p.collected)];
   drawEntityShadows(ctx, shadowCasters, camX, lighting);
@@ -527,6 +561,12 @@ function initUI() {
 
   dom.startBtn.addEventListener('click', () => {
     resumeAudio();
+    sfx.uiSelect();
+    showOverlay('instructions');
+    world.state = 'instructions';
+  });
+
+  dom.beginPlayBtn.addEventListener('click', () => {
     sfx.uiSelect();
     startNewGame();
   });

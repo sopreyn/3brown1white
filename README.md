@@ -2,9 +2,11 @@
 
 An original 8-bit, Super-Mario-style side-scrolling game starring **Buddy the
 Bat**, a fan-made mascot for the Louisville Bats. Buddy walks and jumps
-through five levels, swinging his baseball bat at enemies, collecting little
-bugs for health, grabbing golden bugs for temporary invincibility, and facing
-a "big version of the small enemy" boss at the end of every level.
+through six levels, swinging his baseball bat at enemies, collecting little
+flies for health, grabbing golden (sparkling) flies for temporary invincibility,
+and facing a "big version of the small enemy" boss at the end of every level.
+A short instructions screen explains the controls right after you tap play,
+and every level ends with a confetti burst and a "You beat ___!" screen.
 
 It's a plain HTML5 Canvas + JavaScript game — no build step, no frameworks,
 no external art files. Everything (art, sound, levels) is generated in code,
@@ -12,17 +14,26 @@ so it's light, fast, and trivial to host.
 
 ## Levels
 
-1. **Louisville Slugger Stadium** — angry baseball enemies, giant baseball boss.
-2. **Louisville Slugger Factory** — factory workers, giant foreman boss. Clearing
-   the boss drops a bat power-up that permanently increases Buddy's swing range
-   and damage.
-3. **Big Four Walking Bridge** — joggers, a giant marathoner boss who dashes.
-4. **Downtown Louisville** — businessmen, a giant "Chairman" boss who throws briefcases.
-5. **Away Game: Cincinnati** — rival baseball players, and a big fictional
+1. **Louisville Slugger Stadium** — angry baseball enemies (real stitched
+   seams!), giant baseball boss.
+2. **Louisville Slugger Factory** — *inside* the factory: conveyor belts
+   carrying bats past overhead lamps, tired/overworked factory workers, and
+   patches of open flame on the floor to jump over. Giant foreman boss.
+   Clearing the boss drops a bat power-up that permanently increases Buddy's
+   swing range and damage.
+3. **Big Four Walking Bridge** — joggers, a giant marathoner boss who dashes,
+   a blocky steel through-truss, and the occasional foreground girder
+   sweeping past as if you're walking right next to the bridge structure.
+4. **Downtown Louisville** — businessmen, a giant "Chairman" boss who throws
+   briefcases.
+5. **Butchertown** — a historic street with the pork rendering plant looming
+   behind a chain-link fence; pig enemies, and a giant businessman boss (The
+   Rendering Baron) who throws hams.
+6. **Away Game: Cincinnati** — rival baseball players, and a big fictional
    mascot boss who throws baseballs.
 
 Each level is a bit longer than the last, and Buddy's max HP goes up by one
-every level (6 → 10). Beat the final boss and watch Buddy fly off into a
+every level (6 → 11). Beat the final boss and watch Buddy fly off into a
 sunset "YOU WON!" ending.
 
 Each level also has its own moment in the story's day — a dynamic

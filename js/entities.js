@@ -1,4 +1,5 @@
 import {
+  GAME_WIDTH,
   GRAVITY,
   GROUND_Y,
   MOVE_SPEED,
@@ -275,6 +276,16 @@ export const ENEMY_TYPES = {
     damage: 1,
     points: 100,
   },
+  pig: {
+    frames: [S.PIG_FRAMES.walk1, S.PIG_FRAMES.walk2],
+    palette: S.PIG_PALETTE,
+    w: 20,
+    h: 16,
+    speed: 40,
+    hp: 2,
+    damage: 1,
+    points: 100,
+  },
 };
 
 export const BOSS_TYPES = {
@@ -321,6 +332,17 @@ export const BOSS_TYPES = {
     points: 1400,
     override: S.SUIT_BOSS_OVERRIDE,
     attack: 'throw_briefcase',
+  },
+  butcher_boss: {
+    base: 'suit',
+    name: 'The Rendering Baron',
+    scale: 2.6,
+    hp: 30,
+    damage: 1,
+    speed: 22,
+    points: 1500,
+    override: { s: '#e8e2d3', f: '#d99a66' }, // butcher's apron over the suit
+    attack: 'throw_ham',
   },
   mascot_boss: {
     base: 'mascot',
@@ -579,6 +601,20 @@ export class Pickup {
     if (this.kind === 'bug') {
       S.drawSprite(ctx, 'bug', S.BUG_FRAME, S.BUG_PALETTE, this.x - camX, this.drawY, {});
     } else if (this.kind === 'goldbug') {
+      const cx = this.x - camX + this.w / 2;
+      const cy = this.drawY + this.h / 2;
+      // Tiny single-pixel sparks orbiting the bug, twinkling in and out.
+      for (let i = 0; i < 5; i++) {
+        const angle = this.t * 2.4 + (i / 5) * Math.PI * 2;
+        const radius = 9 + Math.sin(this.t * 3 + i) * 2;
+        const alpha = 0.35 + 0.65 * Math.max(0, Math.sin(this.t * 6 + i * 1.7));
+        if (alpha < 0.12) continue;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = i % 2 === 0 ? '#fff3b0' : '#ffe680';
+        ctx.fillRect(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius * 0.6, 1.5, 1.5);
+        ctx.restore();
+      }
       S.drawSprite(ctx, 'goldbug', S.BUG_FRAME, S.GOLD_BUG_PALETTE, this.x - camX, this.drawY, {
         scale: 1.1,
       });
@@ -605,7 +641,7 @@ export class Projectile {
     this.w = 10;
     this.h = 8;
     this.dead = false;
-    this.gravity = kind === 'briefcase';
+    this.gravity = kind === 'briefcase' || kind === 'ham';
     this.spin = 0;
   }
 
@@ -637,12 +673,73 @@ export class Projectile {
       ctx.restore();
       return;
     }
+    if (this.kind === 'ham') {
+      ctx.save();
+      ctx.translate(this.x - camX + 5, this.y + 4);
+      ctx.rotate(this.spin);
+      ctx.fillStyle = '#d98a6a';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 6, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f0c4a8';
+      ctx.beginPath();
+      ctx.ellipse(-1, -1, 3, 1.6, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#8a5a2b';
+      ctx.fillRect(4, -1, 3, 2);
+      ctx.restore();
+      return;
+    }
     ctx.save();
     ctx.translate(this.x - camX + this.w / 2, this.y + this.h / 2);
     ctx.rotate(this.spin);
     S.drawSprite(ctx, 'proj_' + this.kind, grid, palette, -this.w / 2, -this.h / 2, {});
     ctx.restore();
   }
+}
+
+// ---------------------------------------------------------------------------
+// Fire hazards (static ground obstacles — jump over them)
+// ---------------------------------------------------------------------------
+
+export function drawFireHazard(ctx, hazard, camX, tick) {
+  const x = hazard.x - camX;
+  if (x + hazard.w < -10 || x > GAME_WIDTH + 10) return;
+  const baseY = hazard.y + hazard.h;
+  ctx.save();
+  // glow
+  const glow = ctx.createRadialGradient(x + hazard.w / 2, baseY, 2, x + hazard.w / 2, baseY, hazard.w);
+  glow.addColorStop(0, 'rgba(255, 140, 40, 0.45)');
+  glow.addColorStop(1, 'rgba(255, 140, 40, 0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(x + hazard.w / 2, baseY, hazard.w, 0, Math.PI * 2);
+  ctx.fill();
+
+  const flameCount = Math.max(2, Math.round(hazard.w / 10));
+  for (let i = 0; i < flameCount; i++) {
+    const fx = x + (i + 0.5) * (hazard.w / flameCount);
+    const wobble = Math.sin(tick * 9 + i * 1.7) * 3;
+    const flicker = 0.75 + 0.25 * Math.sin(tick * 14 + i * 2.3);
+    const h = hazard.h * flicker;
+    ctx.fillStyle = '#ffdd55';
+    ctx.beginPath();
+    ctx.moveTo(fx - 4, baseY);
+    ctx.quadraticCurveTo(fx + wobble, baseY - h * 0.6, fx, baseY - h);
+    ctx.quadraticCurveTo(fx - wobble, baseY - h * 0.6, fx + 4, baseY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#ff7a1a';
+    ctx.beginPath();
+    ctx.moveTo(fx - 3, baseY);
+    ctx.quadraticCurveTo(fx + wobble * 0.7, baseY - h * 0.4, fx, baseY - h * 0.6);
+    ctx.quadraticCurveTo(fx - wobble * 0.7, baseY - h * 0.4, fx + 3, baseY);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.fillStyle = 'rgba(20, 12, 8, 0.6)';
+  ctx.fillRect(x, baseY - 2, hazard.w, 3);
+  ctx.restore();
 }
 
 export { aabb };

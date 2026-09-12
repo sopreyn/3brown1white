@@ -39,11 +39,21 @@
         <p class="subtitle">A Louisville Bats 8-bit Adventure</p>
         <p id="bestScore" class="score-line"></p>
         <button id="startBtn" class="pixel-btn">TAP TO PLAY</button>
-        <div class="howto">
-          <p>◀ ▶ or arrow keys to walk &middot; ▲ or Space to jump</p>
-          <p>Tap the screen (or click) to swing your bat!</p>
-        </div>
         <button id="muteBtn" class="pixel-btn small" aria-label="Toggle sound">🔊 SOUND</button>
+      </section>
+
+      <!-- Instructions (shown once, right after starting) -->
+      <section id="instructionsScreen" class="overlay hidden">
+        <h2>HOW TO PLAY</h2>
+        <div class="howto-grid">
+          <div class="howto-row"><span class="howto-icon">◀ ▶</span><span>Walk left / right</span></div>
+          <div class="howto-row"><span class="howto-icon">▲</span><span>Jump (over gaps &amp; fire!)</span></div>
+          <div class="howto-row"><span class="howto-icon">⚾</span><span>Tap the screen to swing your bat</span></div>
+          <div class="howto-row"><span class="howto-icon">🪲</span><span>Bugs restore 1 health</span></div>
+          <div class="howto-row"><span class="howto-icon">✨</span><span>Golden bugs: temporary invincibility</span></div>
+          <div class="howto-row"><span class="howto-icon">👑</span><span>Defeat the boss to clear each level</span></div>
+        </div>
+        <button id="beginPlayBtn" class="pixel-btn">LET'S PLAY!</button>
       </section>
 
       <!-- Pause -->
@@ -56,6 +66,7 @@
 
       <!-- Level complete -->
       <section id="levelCompleteScreen" class="overlay hidden">
+        <div id="confettiLayer" class="confetti-layer"></div>
         <h2 id="levelCompleteTitle">LEVEL COMPLETE!</h2>
         <p id="levelCompleteScore" class="score-line"></p>
         <button id="nextLevelBtn" class="pixel-btn">CONTINUE</button>

@@ -1,4 +1,4 @@
-import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y } from './constants.js';
+import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, FIRE_HAZARD_W, FIRE_HAZARD_H } from './constants.js';
 import { drawSkyAndCelestial, drawStadiumFloodlightBeams } from './lighting.js';
 
 // ---------------------------------------------------------------------------
@@ -204,134 +204,87 @@ const BG = {
   },
 
   // -------------------------------------------------------------------
-  // Historic Louisville Slugger Factory & Museum: Victorian brick
-  // warehouse, the world-famous giant bat leaning on the facade, smoking
-  // chimneys, cobblestone street with trolley rails.
+  // INSIDE the Louisville Slugger Factory: a warm-lit workshop floor with
+  // overhead pipes and hanging lamps, conveyor belts carrying freshly-turned
+  // bats past in the background, stacked timber, and a sawdust-covered floor.
   // -------------------------------------------------------------------
   factory(ctx, camX, tick, lighting) {
-    drawSkyAndCelestial(ctx, lighting, tick);
+    // Warm interior back wall instead of a sky — late-shift lighting still
+    // nudges the tone via `lighting`, just without sun/moon/clouds.
+    const wallTop = lighting.hour >= 19 ? '#2a2018' : '#352a1f';
+    const wallBot = lighting.hour >= 19 ? '#3a2c1e' : '#4a3a28';
+    const wallGrad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+    wallGrad.addColorStop(0, wallTop);
+    wallGrad.addColorStop(1, wallBot);
+    ctx.fillStyle = wallGrad;
+    ctx.fillRect(0, 0, GAME_WIDTH, GROUND_Y);
 
-    repeatParallax(camX, 0.2, 280, GAME_WIDTH, (x) => {
-      ctx.save();
-      ctx.fillStyle = lighting.hour >= 20 || lighting.hour < 5 ? '#1a1422' : lighting.hour >= 18 ? '#3f2b45' : '#574862';
-      ctx.fillRect(x, 80, 80, 110);
-      ctx.fillRect(x + 100, 70, 70, 120);
-      ctx.fillRect(x + 190, 95, 80, 95);
+    // Vertical support beams along the back wall
+    repeatParallax(camX, 0.15, 130, GAME_WIDTH, (x) => {
+      ctx.fillStyle = 'rgba(20, 14, 10, 0.55)';
+      ctx.fillRect(x, 0, 10, GROUND_Y);
+    });
 
+    // Overhead pipe/duct run with hanging work lamps
+    repeatParallax(camX, 0.25, 140, GAME_WIDTH, (x, i) => {
+      ctx.fillStyle = '#4a4a4a';
+      ctx.fillRect(x, 22, 140, 7);
+      ctx.fillStyle = '#333';
+      ctx.fillRect(x + 30, 29, 3, 6);
+      ctx.fillRect(x + 95, 29, 3, 6);
+
+      // hanging lamp
+      const lampX = x + 60;
+      const lampY = 46;
+      ctx.fillStyle = '#1a1512';
+      ctx.fillRect(lampX - 1, 29, 2, 12);
+      ctx.fillStyle = '#caa066';
+      ctx.beginPath();
+      ctx.moveTo(lampX - 8, lampY);
+      ctx.lineTo(lampX + 8, lampY);
+      ctx.lineTo(lampX + 5, lampY + 6);
+      ctx.lineTo(lampX - 5, lampY + 6);
+      ctx.fill();
+      const glow = ctx.createRadialGradient(lampX, lampY + 8, 2, lampX, lampY + 8, 34);
+      const glowAlpha = 0.5 + 0.3 * lighting.windowGlowIntensity;
+      glow.addColorStop(0, `rgba(255, 210, 130, ${glowAlpha})`);
+      glow.addColorStop(1, 'rgba(255, 210, 130, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(lampX, lampY + 10, 34, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Background stock shelves of stacked bat blanks
+    repeatParallax(camX, 0.35, 170, GAME_WIDTH, (x) => {
       ctx.fillStyle = '#3a2e22';
-      ctx.fillRect(x + 120, 52, 26, 18);
-      ctx.beginPath();
-      ctx.moveTo(x + 116, 52);
-      ctx.lineTo(x + 133, 40);
-      ctx.lineTo(x + 150, 52);
-      ctx.fill();
-      ctx.restore();
+      ctx.fillRect(x, 96, 70, 60);
+      for (let row = 0; row < 5; row++) {
+        ctx.fillStyle = row % 2 === 0 ? '#caa066' : '#b58b4f';
+        ctx.fillRect(x + 4, 100 + row * 11, 62, 6);
+      }
     });
 
-    // The world-famous 120-ft giant bat leaning on the historic brick facade
-    repeatParallax(camX, 0.4, 380, GAME_WIDTH, (x) => {
-      ctx.save();
-      const bldgX = x + 30;
-      ctx.fillStyle = '#5c2725';
-      ctx.fillRect(bldgX, 65, 220, 135);
-      ctx.fillStyle = '#3d1817';
-      ctx.fillRect(bldgX - 4, 62, 228, 6);
-      ctx.fillRect(bldgX - 2, 105, 224, 3);
-      ctx.fillRect(bldgX - 2, 145, 224, 3);
+    drawFactoryConveyor(ctx, camX, tick, 168, { factor: 0.55, speed: 26, spacing: 46, flip: false });
+    drawFactoryConveyor(ctx, camX, tick, 190, { factor: 0.8, speed: -34, spacing: 40, flip: true });
 
-      for (let floor = 0; floor < 3; floor++) {
-        for (let col = 0; col < 5; col++) {
-          const wx = bldgX + 16 + col * 40;
-          const wy = 72 + floor * 40;
-          ctx.fillStyle = '#261214';
-          ctx.fillRect(wx, wy, 24, 28);
-          ctx.beginPath();
-          ctx.arc(wx + 12, wy, 12, Math.PI, 0);
-          ctx.fill();
-
-          const isLit = (col + floor) % 2 === 0 || lighting.windowGlowIntensity > 0.4;
-          if (isLit) {
-            ctx.fillStyle = `rgba(255, 185, 90, ${0.4 + 0.5 * lighting.windowGlowIntensity})`;
-            ctx.fillRect(wx + 3, wy + 2, 18, 22);
-            ctx.fillStyle = '#261214';
-            ctx.fillRect(wx + 11, wy, 2, 26);
-            ctx.fillRect(wx + 3, wy + 11, 18, 2);
-          }
-        }
-      }
-
-      const batBaseX = bldgX + 185;
-      ctx.translate(batBaseX, 55);
-      ctx.rotate(-0.16);
-      const batGrad = ctx.createLinearGradient(-10, 0, 10, 0);
-      batGrad.addColorStop(0, '#caa268');
-      batGrad.addColorStop(0.5, '#e0be84');
-      batGrad.addColorStop(1, '#9e7338');
-      ctx.fillStyle = batGrad;
-      ctx.fillRect(-10, 0, 20, 85);
-      ctx.fillStyle = '#d4af37';
-      ctx.beginPath();
-      ctx.ellipse(0, 38, 7, 12, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#3a200a';
-      ctx.fillRect(-4, 37, 8, 2);
-      ctx.fillStyle = '#b58b4f';
-      ctx.fillRect(-6, 85, 12, 55);
-      ctx.fillStyle = '#8f6834';
-      ctx.fillRect(-9, 140, 18, 6);
-      ctx.restore();
-    });
-
-    // Industrial smokestacks with billowing steam
-    repeatParallax(camX, 0.55, 160, GAME_WIDTH, (x, i) => {
-      ctx.save();
-      const stackX = x + 35;
-      ctx.fillStyle = '#3e2321';
-      ctx.fillRect(stackX, 55, 14, 60);
-      ctx.fillStyle = '#291413';
-      ctx.fillRect(stackX - 2, 53, 18, 4);
-
-      for (let s = 0; s < 3; s++) {
-        const smokeAge = (tick * 0.8 + s * 0.6 + i) % 2.0;
-        const smokeProgress = smokeAge / 2.0;
-        const puffX = stackX + 7 + Math.sin(tick + s) * 10 + smokeProgress * 24;
-        const puffY = 50 - smokeProgress * 45;
-        const puffR = 6 + smokeProgress * 12;
-        const alpha = Math.max(0, 0.45 * (1 - smokeProgress));
-        ctx.fillStyle = lighting.hour >= 18 || lighting.hour < 6 ? `rgba(180, 175, 190, ${alpha})` : `rgba(230, 225, 235, ${alpha})`;
-        ctx.beginPath();
-        ctx.arc(puffX, puffY, puffR, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      ctx.fillStyle = '#4a3c30';
-      ctx.fillRect(x + 10, 155, 65, 45);
-      ctx.fillStyle = '#8c6840';
-      for (let p = 0; p < 3; p++) {
-        ctx.fillRect(x + 16, 162 + p * 10, 52, 6);
-      }
-      ctx.restore();
-    });
-
-    // Cobblestone street with trolley rails
+    // Sawdust-covered wood-plank factory floor
     ctx.save();
-    const cobbleTop = lighting.hour >= 19 || lighting.hour < 6 ? '#322d28' : '#5a4f44';
-    const cobbleBase = lighting.hour >= 19 || lighting.hour < 6 ? '#201c18' : '#383028';
-    ctx.fillStyle = cobbleTop;
-    ctx.fillRect(0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y);
-
-    repeatParallax(camX, 1.0, 16, GAME_WIDTH, (x) => {
-      ctx.fillStyle = '#1c1916';
-      ctx.fillRect(x, GROUND_Y + 4, 14, 2);
-      ctx.fillRect(x + 4, GROUND_Y + 12, 12, 2);
+    const floorTop = lighting.hour >= 19 ? '#5c4630' : '#6e5438';
+    const floorBase = lighting.hour >= 19 ? '#3a2c1d' : '#463522';
+    ctx.fillStyle = floorTop;
+    ctx.fillRect(0, GROUND_Y, GAME_WIDTH, 6);
+    repeatParallax(camX, 1.0, 26, GAME_WIDTH, (x) => {
+      ctx.fillStyle = 'rgba(20, 14, 8, 0.35)';
+      ctx.fillRect(x, GROUND_Y, 2, 6);
     });
-
-    ctx.fillStyle = lighting.streetlampIntensity > 0.3 ? '#c4b59b' : '#7d7465';
-    ctx.fillRect(0, GROUND_Y + 7, GAME_WIDTH, 2);
-    ctx.fillRect(0, GROUND_Y + 16, GAME_WIDTH, 2);
-
-    ctx.fillStyle = cobbleBase;
-    ctx.fillRect(0, GROUND_Y + 22, GAME_WIDTH, GAME_HEIGHT - GROUND_Y - 22);
+    ctx.fillStyle = floorBase;
+    ctx.fillRect(0, GROUND_Y + 6, GAME_WIDTH, GAME_HEIGHT - GROUND_Y - 6);
+    // sawdust specks
+    repeatParallax(camX, 1.0, 18, GAME_WIDTH, (x, i) => {
+      ctx.fillStyle = 'rgba(210, 175, 120, 0.55)';
+      ctx.fillRect(x + (i % 3) * 5, GROUND_Y + 9 + (i % 2) * 4, 2, 1.5);
+    });
     ctx.restore();
   },
 
@@ -410,7 +363,9 @@ const BG = {
     });
     ctx.restore();
 
-    // Big Four Bridge steel truss arches
+    // Big Four Bridge steel through-truss — solid blocky beam segments (a
+    // stepped arch of straight members, not a smooth curve) in the same
+    // rust-steel finish as the foreground beams, for a cohesive look.
     repeatParallax(camX, 0.55, 200, GAME_WIDTH, (x) => {
       ctx.save();
       ctx.fillStyle = '#54585c';
@@ -418,37 +373,35 @@ const BG = {
       ctx.fillStyle = '#3e4246';
       ctx.fillRect(x + 183, 146, 32, 5);
 
-      ctx.strokeStyle = '#853222';
-      ctx.lineWidth = 3.5;
-      ctx.beginPath();
-      ctx.moveTo(x, GROUND_Y - 8);
-      ctx.quadraticCurveTo(x + 100, 48, x + 200, GROUND_Y - 8);
-      ctx.stroke();
+      const baseY = GROUND_Y - 8;
+      // Stepped-arch top-chord nodes: a blocky hump, not a bezier curve.
+      const nodeX = [0, 40, 80, 120, 160, 200].map((n) => x + n);
+      const topY = [126, 92, 62, 62, 92, 126];
+      const ledOn = lighting.stadiumLightsOn || lighting.hour >= 19.5 || lighting.hour < 6;
+      const ledColor = ledOn ? `hsl(${(tick * 40 + x * 0.5) % 360}, 85%, 60%)` : null;
 
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      for (let s = 1; s <= 7; s++) {
-        const strutX = x + s * 25;
-        const topY = 48 + Math.pow((s - 4) / 3.2, 2) * 55;
-        ctx.moveTo(strutX, GROUND_Y - 8);
-        ctx.lineTo(strutX, topY);
-        if (s < 7) {
-          const nextX = x + (s + 1) * 25;
-          const nextTopY = 48 + Math.pow((s + 1 - 4) / 3.2, 2) * 55;
-          ctx.moveTo(strutX, GROUND_Y - 8);
-          ctx.lineTo(nextX, nextTopY);
+      // Bottom chord (one solid beam the full span)
+      drawTrussBeam(ctx, x, baseY, x + 200, baseY, 6, '#4a2f22', '#6b4630');
+      // Top chord segments (the stepped arch)
+      for (let i = 0; i < nodeX.length - 1; i++) {
+        drawTrussBeam(ctx, nodeX[i], topY[i], nodeX[i + 1], topY[i + 1], 6, '#4a2f22', ledColor || '#6b4630');
+      }
+      // Verticals + diagonals (Warren-style zigzag) between the chords
+      for (let i = 0; i < nodeX.length; i++) {
+        drawTrussBeam(ctx, nodeX[i], topY[i], nodeX[i], baseY, 4, '#3e2a1e', '#5a3c2a');
+        if (i < nodeX.length - 1) {
+          drawTrussBeam(ctx, nodeX[i], topY[i], nodeX[i + 1], baseY, 3.5, '#3e2a1e', '#5a3c2a');
         }
       }
-      ctx.stroke();
-
-      if (lighting.stadiumLightsOn || lighting.hour >= 19.5 || lighting.hour < 6) {
-        const ledColor = `hsl(${(tick * 40 + x * 0.5) % 360}, 90%, 65%)`;
-        ctx.strokeStyle = ledColor;
-        ctx.lineWidth = 2;
+      // Rivets at every joint
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      for (let i = 0; i < nodeX.length; i++) {
         ctx.beginPath();
-        ctx.moveTo(x, GROUND_Y - 8);
-        ctx.quadraticCurveTo(x + 100, 48, x + 200, GROUND_Y - 8);
-        ctx.stroke();
+        ctx.arc(nodeX[i], topY[i], 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(nodeX[i], baseY, 2, 0, Math.PI * 2);
+        ctx.fill();
       }
       ctx.restore();
     });
@@ -614,6 +567,108 @@ const BG = {
   },
 
   // -------------------------------------------------------------------
+  // Butchertown: a historic brick street with the pork rendering plant
+  // looming behind a chain-link fence, loading docks, and a faintly
+  // greenish haze drifting from its stacks.
+  // -------------------------------------------------------------------
+  butchertown(ctx, camX, tick, lighting) {
+    drawSkyAndCelestial(ctx, lighting, tick);
+
+    // The rendering plant itself, far back
+    repeatParallax(camX, 0.18, 300, GAME_WIDTH, (x) => {
+      ctx.save();
+      const plantTone = lighting.hour >= 20 || lighting.hour < 5 ? '#171a1e' : lighting.hour >= 18 ? '#2c2f33' : '#3f4348';
+      ctx.fillStyle = plantTone;
+      ctx.fillRect(x, 90, 260, 110);
+      ctx.fillStyle = '#252a2e';
+      ctx.fillRect(x - 4, 86, 268, 6);
+
+      // three squat smokestacks with a faint sickly-green haze
+      for (let s = 0; s < 3; s++) {
+        const sx = x + 30 + s * 90;
+        ctx.fillStyle = '#33383d';
+        ctx.fillRect(sx, 55, 16, 38);
+        for (let p = 0; p < 3; p++) {
+          const age = (tick * 0.6 + s * 0.7 + p) % 2.2;
+          const prog = age / 2.2;
+          const puffX = sx + 8 + Math.sin(tick * 0.7 + s + p) * 8;
+          const puffY = 52 - prog * 40;
+          const puffR = 5 + prog * 10;
+          const alpha = Math.max(0, 0.32 * (1 - prog));
+          ctx.fillStyle = `rgba(150, 190, 120, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(puffX, puffY, puffR, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // grid of small dark windows
+      if (lighting.windowGlowIntensity > 0.1) {
+        ctx.fillStyle = `rgba(200, 220, 180, ${0.5 * lighting.windowGlowIntensity})`;
+        for (let r = 0; r < 4; r++)
+          for (let c = 0; c < 8; c++) {
+            if ((r + c) % 3 === 0) ctx.fillRect(x + 14 + c * 30, 100 + r * 20, 10, 10);
+          }
+      }
+      ctx.restore();
+    });
+
+    // Chain-link fence between the street and the plant yard
+    repeatParallax(camX, 0.5, 24, GAME_WIDTH, (x) => {
+      ctx.strokeStyle = 'rgba(140, 140, 140, 0.45)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, 172);
+      ctx.lineTo(x + 12, 196);
+      ctx.moveTo(x + 12, 172);
+      ctx.lineTo(x, 196);
+      ctx.stroke();
+    });
+    ctx.fillStyle = 'rgba(90, 90, 90, 0.6)';
+    ctx.fillRect(0, 170, GAME_WIDTH, 3);
+    ctx.fillRect(0, 195, GAME_WIDTH, 3);
+
+    // Loading dock with a parked delivery truck and stacked barrels
+    repeatParallax(camX, 0.4, 260, GAME_WIDTH, (x) => {
+      ctx.save();
+      ctx.fillStyle = '#4a4038';
+      ctx.fillRect(x + 10, 150, 90, 50);
+      // truck
+      ctx.fillStyle = '#8a1f24';
+      ctx.fillRect(x + 130, 158, 64, 32);
+      ctx.fillStyle = '#d8d8d4';
+      ctx.fillRect(x + 130, 158, 20, 32);
+      ctx.fillStyle = '#1a1a1a';
+      ctx.beginPath();
+      ctx.arc(x + 142, 190, 5, 0, Math.PI * 2);
+      ctx.arc(x + 182, 190, 5, 0, Math.PI * 2);
+      ctx.fill();
+      // stacked barrels
+      for (let b = 0; b < 3; b++) {
+        ctx.fillStyle = b % 2 === 0 ? '#6b5a3a' : '#7a6944';
+        ctx.fillRect(x + 20 + b * 22, 168, 16, 20);
+        ctx.fillStyle = '#3a3020';
+        ctx.fillRect(x + 20 + b * 22, 172, 16, 2);
+      }
+      ctx.restore();
+    });
+
+    // Historic brick street
+    ctx.save();
+    const brickTop = lighting.hour >= 19 || lighting.hour < 6 ? '#3a2624' : '#5c3c38';
+    const brickBase = lighting.hour >= 19 || lighting.hour < 6 ? '#241614' : '#3a2622';
+    ctx.fillStyle = brickTop;
+    ctx.fillRect(0, GROUND_Y, GAME_WIDTH, 6);
+    repeatParallax(camX, 1.0, 18, GAME_WIDTH, (x, i) => {
+      ctx.fillStyle = 'rgba(20, 10, 8, 0.35)';
+      ctx.fillRect(x + (i % 2) * 9, GROUND_Y + 1, 16, 2);
+    });
+    ctx.fillStyle = brickBase;
+    ctx.fillRect(0, GROUND_Y + 6, GAME_WIDTH, GAME_HEIGHT - GROUND_Y - 6);
+    ctx.restore();
+  },
+
+  // -------------------------------------------------------------------
   // Away game — Cincinnati's Great American Ball Park: the riverfront
   // skyline (Great American Tower's tiara, Carew Tower, the Roebling
   // Bridge), the iconic power-stack smokestacks with shooting flames.
@@ -756,6 +811,67 @@ const BG = {
   },
 };
 
+/**
+ * A conveyor belt running the width of the screen with little bats sliding
+ * along it — independent of camera parallax, the bats keep flowing over
+ * time via `speed` (world px/s; negative runs right-to-left).
+ */
+function drawFactoryConveyor(ctx, camX, tick, y, opts) {
+  const { factor, speed, spacing, flip } = opts;
+  ctx.save();
+
+  // Belt structure (parallaxes with camera like everything else on this layer)
+  repeatParallax(camX, factor, 90, GAME_WIDTH, (x) => {
+    ctx.fillStyle = '#241c14';
+    ctx.fillRect(x + 6, y + 10, 6, 22);
+    ctx.fillRect(x + 66, y + 10, 6, 22);
+  });
+  ctx.fillStyle = '#3a3028';
+  ctx.fillRect(0, y, GAME_WIDTH, 10);
+  ctx.fillStyle = '#161210';
+  ctx.fillRect(0, y + 8, GAME_WIDTH, 2);
+
+  // Bats flowing along the belt: parallax offset (camera) plus a continuous
+  // time-based shift (the belt actually moving), combined in one modulo.
+  const shift = camX * factor - tick * speed;
+  const offset = -(shift % spacing);
+  const count = Math.ceil(GAME_WIDTH / spacing) + 2;
+  for (let i = -1; i <= count; i++) {
+    const bx = offset + i * spacing + 20;
+    ctx.save();
+    ctx.translate(bx, y - 2);
+    if (flip) ctx.scale(-1, 1);
+    ctx.rotate(-0.08);
+    ctx.fillStyle = '#caa066';
+    ctx.fillRect(-14, -2, 22, 4);
+    ctx.fillStyle = '#8f6834';
+    ctx.fillRect(8, -2, 6, 4);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+/** A solid rectangular steel-beam segment between two points, any angle —
+ * chunky and outlined, matching the foreground bridge beams' style. */
+function drawTrussBeam(ctx, x1, y1, x2, y2, thickness, edgeColor, faceColor) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = (-dy / len) * (thickness / 2);
+  const ny = (dx / len) * (thickness / 2);
+  ctx.beginPath();
+  ctx.moveTo(x1 + nx, y1 + ny);
+  ctx.lineTo(x2 + nx, y2 + ny);
+  ctx.lineTo(x2 - nx, y2 - ny);
+  ctx.lineTo(x1 - nx, y1 - ny);
+  ctx.closePath();
+  ctx.fillStyle = faceColor;
+  ctx.fill();
+  ctx.strokeStyle = edgeColor;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
 /** Clay warning track + mowed-stripe turf, shared by both stadium levels. */
 function drawBaseballTurf(ctx, camX, lighting) {
   ctx.save();
@@ -884,6 +1000,13 @@ function buildLevel(cfg) {
     pickupSpawns.push({ kind: 'bat', x: bossArenaStart + 60, y: GROUND_Y - 50 });
   }
 
+  const hazards = (cfg.hazardXs || []).map((x) => ({
+    x,
+    y: GROUND_Y - FIRE_HAZARD_H,
+    w: FIRE_HAZARD_W,
+    h: FIRE_HAZARD_H,
+  }));
+
   return {
     id: cfg.id,
     name: cfg.name,
@@ -891,6 +1014,7 @@ function buildLevel(cfg) {
     width: cfg.width,
     maxHp: cfg.maxHp,
     platforms: cfg.platforms,
+    hazards,
     enemySpawns,
     pickupSpawns,
     bossKey: cfg.bossKey,
@@ -930,6 +1054,7 @@ export const LEVELS = [
     goldBugCount: 1,
     bossKey: 'worker_boss',
     endPowerup: true,
+    hazardXs: [750, 1350, 1900, 2420],
     platforms: [
       { x: 460, y: GROUND_Y - 40, w: 80 },
       { x: 1000, y: GROUND_Y - 60, w: 60 },
@@ -978,14 +1103,34 @@ export const LEVELS = [
   }),
   buildLevel({
     id: 5,
-    name: 'Away Game: Cincinnati',
-    bg: 'redsStadium',
-    width: 4700,
+    name: 'Butchertown',
+    bg: 'butchertown',
+    width: 4400,
     maxHp: 10,
-    enemyType: 'redsplayer',
+    enemyType: 'pig',
     enemyCount: 10,
     bugCount: 7,
     goldBugCount: 2,
+    bossKey: 'butcher_boss',
+    platforms: [
+      { x: 490, y: GROUND_Y - 40, w: 80 },
+      { x: 1080, y: GROUND_Y - 50, w: 60 },
+      { x: 1680, y: GROUND_Y - 40, w: 80 },
+      { x: 2280, y: GROUND_Y - 50, w: 70 },
+      { x: 2900, y: GROUND_Y - 40, w: 80 },
+      { x: 3480, y: GROUND_Y - 50, w: 70 },
+    ],
+  }),
+  buildLevel({
+    id: 6,
+    name: 'Away Game: Cincinnati',
+    bg: 'redsStadium',
+    width: 4900,
+    maxHp: 11,
+    enemyType: 'redsplayer',
+    enemyCount: 11,
+    bugCount: 7,
+    goldBugCount: 3,
     bossKey: 'mascot_boss',
     platforms: [
       { x: 500, y: GROUND_Y - 40, w: 80 },
@@ -994,7 +1139,8 @@ export const LEVELS = [
       { x: 2300, y: GROUND_Y - 50, w: 70 },
       { x: 2900, y: GROUND_Y - 40, w: 80 },
       { x: 3500, y: GROUND_Y - 50, w: 70 },
-      { x: 4050, y: GROUND_Y - 40, w: 80 },
+      { x: 4100, y: GROUND_Y - 40, w: 80 },
+      { x: 4650, y: GROUND_Y - 50, w: 70 },
     ],
   }),
 ];

@@ -123,6 +123,66 @@ html, body {
   max-width: 90%;
 }
 
+.howto-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 12px 16px;
+  max-width: 92%;
+  margin: 4px 0 6px;
+}
+
+.howto-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: clamp(7px, 1.9vw, 10px);
+  color: #e6e6ea;
+  text-align: left;
+}
+
+.howto-icon {
+  flex: 0 0 auto;
+  min-width: 34px;
+  text-align: center;
+  font-size: clamp(9px, 2.4vw, 13px);
+  color: var(--bats-white);
+}
+
+.confetti-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -12px;
+  width: 6px;
+  height: 10px;
+  opacity: 0.95;
+  animation: confettiFall linear forwards;
+}
+
+.confetti-piece.round {
+  border-radius: 50%;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(340px) rotate(540deg);
+    opacity: 0;
+  }
+}
+
 .score-line {
   font-size: clamp(9px, 2.2vw, 13px);
   color: #ffd76a;

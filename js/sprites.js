@@ -125,10 +125,14 @@ export const BASEBALL_BOSS_OVERRIDE = { e: '#ffdd00', s: '#8b1023' };
 
 export const WORKER_PALETTE = {
   h: '#f2c14e', f: '#e8b686', b: '#3b6ea5', d: '#274a73', g: '#26374a', s: '#111111', t: '#9aa0a6',
+  w: '#96cdeb', // sweat drop
+  m: '#78503b', // frown
 };
+// Tired, overworked look: droopy brows shadowing half-lidded eyes, a
+// downturned frown, and a sweat drop — a long shift on the factory floor.
 export const WORKER_FRAMES = {
-  walk1: ['..hhhh..', '.hhhhhh.', '.ffffff.', '.f.ff.f.', '..ffff..', '.bbbbbb.', 'tbbbbbb.', '.bbbbbb.', '.bdddb..', '..gggg..', '.g....g.', 's......s'],
-  walk2: ['..hhhh..', '.hhhhhh.', '.ffffff.', '.f.ff.f.', '..ffff..', '.bbbbbb.', 'tbbbbbb.', '.bbbbbb.', '.bdddb..', '..gggg..', 'g....g..', '.s....s.'],
+  walk1: ['..hhhh.w', '.hhhhhh.', '.ffffff.', '.fd..df.', '..fmmf..', '.bbbbbb.', 'tbbbbbb.', '.bbbbbb.', '.bdddb..', '..gggg..', '.g....g.', 's......s'],
+  walk2: ['..hhhh.w', '.hhhhhh.', '.ffffff.', '.fd..df.', '..fmmf..', '.bbbbbb.', 'tbbbbbb.', '.bbbbbb.', '.bdddb..', '..gggg..', 'g....g..', '.s....s.'],
 };
 export const WORKER_BOSS_OVERRIDE = { f: '#d99a66', h: '#ff3b3b' };
 
@@ -160,6 +164,15 @@ export const REDS_PALETTE = {
 export const REDS_FRAMES = {
   walk1: ['..cccc..', '.cffffc.', '.ffffff.', '.f.ff.f.', '..uuuu..', '.uuuuuu.', 'uuuupuuu', '.uuuuuu.', '..pppp..', '.p....p.', 'k......k', 's......s'],
   walk2: ['..cccc..', '.cffffc.', '.ffffff.', '.f.ff.f.', '..uuuu..', '.uuuuuu.', 'uuuupuuu', '.uuuuuu.', '..pppp..', 'p....p..', '.k....k.', '.s....s.'],
+};
+
+// Butchertown enemy — a small running pig.
+export const PIG_PALETTE = {
+  p: '#f0aab4', d: '#d2828f', s: '#fac8cd', n: '#965068', e: '#1e1414', h: '#3c1e1e',
+};
+export const PIG_FRAMES = {
+  walk1: ['..pp..pp..', '.pppppppp.', 'ppepppppps', 'ppppppppns', 'pdppppppss', '.pppppppp.', '..h.hh.h..', '..h.hh.h..'],
+  walk2: ['..pp..pp..', '.pppppppp.', 'ppepppppps', 'ppppppppns', 'pdppppppss', '.pppppppp.', '.h.hh.h...', 'h.hh.h....'],
 };
 
 // Original mascot for the away game — NOT the real Reds mascot, a fictional
@@ -202,10 +215,12 @@ export const MASCOT_FRAMES = {
 // Pickups
 // ---------------------------------------------------------------------------
 
-export const BUG_PALETTE = { r: '#8b3a2b', k: '#161616', w: '#ffffff' };
-export const BUG_FRAME = ['.kkkk.', 'krrrrk', 'krkrkk', 'rrrrrr', 'krkrkk', '.kkkk.'];
+// A simple little fly, not a ladybug — small dark body, two translucent
+// wings, tiny eye. The golden variant reuses the same shape, just recolored.
+export const BUG_PALETTE = { k: '#1c1c1c', w: '#c7d2d4', e: '#c8102e' };
+export const BUG_FRAME = ['w.k.w', '.kek.', 'kkkkk', '.kkk.', '..k..'];
 
-export const GOLD_BUG_PALETTE = { r: '#ffcc00', k: '#7a5200', w: '#ffffff' };
+export const GOLD_BUG_PALETTE = { k: '#ffcc00', w: '#fff3b0', e: '#7a5200' };
 
 export const POWERUP_BAT_PALETTE = { t: '#ffe08a', d: '#c9861a', g: '#ffffff' };
 export const POWERUP_BAT_GRID = ['.gt', '.gt', '.gt', '.gd', '.gd', 'gdd', 'gdd', 'gdd'].map((r) =>

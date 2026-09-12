@@ -13,8 +13,8 @@ export const JUMP_VELOCITY = -335; // game-px / s
 export const MAX_FALL_SPEED = 620;
 
 // Matches the ~17:15 aspect ratio of the player's bat artwork (assets/player-bat.png).
-export const PLAYER_W = 20;
-export const PLAYER_H = 18;
+export const PLAYER_W = 25;
+export const PLAYER_H = 22;
 
 export const SWING_DURATION = 0.22; // seconds the bat hitbox is active
 export const SWING_COOLDOWN = 0.22; // seconds before another swing can start
@@ -30,6 +30,10 @@ export const KNOCKBACK_VY = -180;
 export const PIXEL = 2; // size (in game px) of one "art pixel" for character sprites
 
 export const STORAGE_KEY = 'buddyBatSave.v1';
+
+export const FIRE_HAZARD_W = 30; // ground-fire patch width — jumpable, not walkable-over
+export const FIRE_HAZARD_H = 24; // comfortably under the ~37px max jump rise
+export const FIRE_HAZARD_DAMAGE = 1;
 
 // When true, enemies/boss/projectiles are still there and animate normally,
 // but can't damage the player on contact — lets you walk straight through a
