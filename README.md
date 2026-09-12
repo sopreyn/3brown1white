@@ -78,7 +78,9 @@ js/input.js            Keyboard + touch input, unified
 js/game.js             State machine, game loop, collisions, HUD, UI wiring
 js/main.js             Bootstraps the game + registers the service worker
 manifest.json / sw.js  "Add to Home Screen" support and basic offline caching
-assets/icon.svg        The pixel-art Buddy the Bat logo/favicon
+assets/icon-favicon.png  Custom bat artwork (transparent bg) — favicon + title-screen logo
+assets/icon-192.png      Same artwork on a solid background — apple-touch-icon + manifest
+assets/icon-512.png      Larger version for manifest/PWA icons
 ```
 
 ## Tuning
@@ -91,9 +93,9 @@ invincibility lasts, level lengths, how many enemies/pickups spawn — lives in
 
 ## Notes on the art
 
-The mascot design, enemies, and the "Rowdy the Riverboat" away-game boss are
-original pixel art created for this game, using the Louisville Bats' public
-red/black/white color scheme — not a reproduction of any official team logo
-or artwork. If you plan to publish this under the Louisville Bats name, it's
-worth running the final art past the team/MiLB for sign-off before a public
-launch.
+The game's icon/logo is custom pixel art supplied for this project. The
+in-game sprites (enemies, bosses, backgrounds) are original pixel art drawn
+in code for this game, using the Louisville Bats' public red/black/white
+color scheme — not a reproduction of any official team logo or artwork. If
+you plan to publish this under the Louisville Bats name, it's worth running
+the final art past the team/MiLB for sign-off before a public launch.
