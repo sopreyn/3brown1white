@@ -12,8 +12,9 @@ export const MOVE_SPEED = 92; // game-px / s
 export const JUMP_VELOCITY = -335; // game-px / s
 export const MAX_FALL_SPEED = 620;
 
-export const PLAYER_W = 16;
-export const PLAYER_H = 24;
+// Matches the ~17:15 aspect ratio of the player's bat artwork (assets/player-bat.png).
+export const PLAYER_W = 20;
+export const PLAYER_H = 18;
 
 export const SWING_DURATION = 0.22; // seconds the bat hitbox is active
 export const SWING_COOLDOWN = 0.22; // seconds before another swing can start

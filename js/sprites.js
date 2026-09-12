@@ -58,101 +58,55 @@ export function spriteSize(grid, pixelSize = PIXEL, scale = 1) {
 }
 
 // ---------------------------------------------------------------------------
-// Buddy the Bat (player) — original mascot: a small winged bat in a red &
-// white Louisville Bats jersey, swinging a baseball bat.
+// Buddy the Bat (player) — hand-drawn artwork (assets/player-bat.png),
+// supplied by the user, used both as the game's icon and as the actual
+// on-screen player character. Its natural pose faces left.
 // ---------------------------------------------------------------------------
 
-export const PLAYER_PALETTE = {
-  e: '#161616', // ear/wing black
-  p: '#5b3aa0', // fur purple
-  l: '#7c5cc4', // fur highlight
-  r: '#c8102e', // cap red
-  c: '#f5f5f0', // cap logo / trim white
-  w: '#ffffff', // eye white
-  b: '#111111', // eye pupil
-  j: '#f5f5f0', // jersey white
-  k: '#c8102e', // jersey trim red
-  g: '#2b2b33', // pants
-  h: '#111111', // shoes
-};
+let playerImage = null;
 
-export const PLAYER_FRAMES = {
-  idle: [
-    '.e....e.',
-    'ee....ee',
-    '.rrrrrr.',
-    '.rcrrcr.',
-    '.pppppp.',
-    '.pwbwbp.',
-    '.pllllp.',
-    '..jjjj..',
-    '.jjjjjj.',
-    '.jkjjkj.',
-    '..g..g..',
-    '..h..h..',
-  ],
-  walk1: [
-    '.e....e.',
-    'ee....ee',
-    '.rrrrrr.',
-    '.rcrrcr.',
-    '.pppppp.',
-    '.pwbwbp.',
-    '.pllllp.',
-    '..jjjj..',
-    '.jjjjjj.',
-    '.jkjjkj.',
-    '.g....g.',
-    'h......h',
-  ],
-  walk2: [
-    '.e....e.',
-    'ee....ee',
-    '.rrrrrr.',
-    '.rcrrcr.',
-    '.pppppp.',
-    '.pwbwbp.',
-    '.pllllp.',
-    '..jjjj..',
-    '.jjjjjj.',
-    '.jkjjkj.',
-    '..gg....',
-    '..hh....',
-  ],
-  jump: [
-    '.e....e.',
-    'ee....ee',
-    '.rrrrrr.',
-    '.rcrrcr.',
-    '.pppppp.',
-    '.pwbwbp.',
-    '.pllllp.',
-    '..jjjj..',
-    '.jjjjjj.',
-    '.jkjjkj.',
-    '.g....g.',
-    '........',
-  ],
-  hurt: [
-    '.e....e.',
-    'ee....ee',
-    '.rrrrrr.',
-    '.rcrrcr.',
-    '.pppppp.',
-    '.pbwwbp.',
-    '.pllllp.',
-    '..jjjj..',
-    '.jjjjjj.',
-    '.jkjjkj.',
-    '.g....g.',
-    '.h....h.',
-  ],
-};
+/** Kick off (or reuse) loading the player sprite. Safe to call repeatedly. */
+export function getPlayerImage() {
+  if (!playerImage) {
+    playerImage = new Image();
+    playerImage.src = 'assets/player-bat.png';
+  }
+  return playerImage;
+}
 
-export const BAT_PALETTE = { t: '#c9a066', d: '#7a4c22' };
-export const BAT_GRID = ['.t', '.t', '.t', '.t', '.T', '.T', 'TT', 'TT'].map((r) =>
-  r.replace(/T/g, 'd')
-);
+const tintScratch = document.createElement('canvas');
+
+/**
+ * Draw the player image centered at (x + w/2, y + h/2), optionally flipped,
+ * rotated (radians, around its own center), and tinted (used for the
+ * golden-bug invincibility rainbow flash — recolors only the sprite's own
+ * opaque pixels, via a small offscreen composite, so it doesn't bleed onto
+ * the rest of the scene).
+ */
+export function drawPlayerImage(ctx, img, x, y, w, h, opts = {}) {
+  if (!img.complete || img.naturalWidth === 0) return;
+  const { flip = false, rotation = 0, tint = null, tintAlpha = 0.55 } = opts;
+  ctx.save();
+  ctx.translate(x + w / 2, y + h / 2);
+  if (flip) ctx.scale(-1, 1);
+  if (rotation) ctx.rotate(rotation);
+  if (tint) {
+    tintScratch.width = img.naturalWidth;
+    tintScratch.height = img.naturalHeight;
+    const tctx = tintScratch.getContext('2d');
+    tctx.imageSmoothingEnabled = false;
+    tctx.clearRect(0, 0, tintScratch.width, tintScratch.height);
+    tctx.drawImage(img, 0, 0);
+    tctx.globalCompositeOperation = 'source-atop';
+    tctx.globalAlpha = tintAlpha;
+    tctx.fillStyle = tint;
+    tctx.fillRect(0, 0, tintScratch.width, tintScratch.height);
+    ctx.drawImage(tintScratch, -w / 2, -h / 2, w, h);
+  } else {
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+  }
+  ctx.restore();
+}
 
 // ---------------------------------------------------------------------------
 // Small enemies + bosses. Bosses reuse the same grid at a larger pixel size

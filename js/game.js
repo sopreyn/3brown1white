@@ -470,14 +470,11 @@ function renderEnding() {
   const t = Math.min(1, world.cutsceneTimer / 4.2);
   const x = -40 + t * (GAME_WIDTH + 80);
   const y = GAME_HEIGHT / 2 - 10 + Math.sin(world.tick * 5) * 14;
-  const flap = Math.sin(world.tick * 14) > 0;
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(-0.15);
-  S.drawSprite(ctx, 'flying', S.PLAYER_FRAMES.jump, S.PLAYER_PALETTE, 0, flap ? 0 : 2, {
-    scale: 1.4,
+  const wingFlap = Math.sin(world.tick * 14) * 0.08;
+  S.drawPlayerImage(ctx, S.getPlayerImage(), x - 14, y - 12, 28, 25, {
+    flip: true, // flying left-to-right; artwork's natural pose faces left
+    rotation: -0.15 + wingFlap,
   });
-  ctx.restore();
 
   if (world.state === 'win' || world.cutsceneTimer > 1.4) {
     ctx.save();
@@ -584,6 +581,7 @@ function initUI() {
 }
 
 export function initGame() {
+  S.getPlayerImage(); // kick off loading now, not on the first draw call
   initUI();
   showOverlay('title');
   requestAnimationFrame((ts) => {

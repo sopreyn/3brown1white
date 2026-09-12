@@ -65,8 +65,7 @@ export class Player {
     this.swingCooldown = 0;
     this.hitThisSwing = new Set();
     this.batUpgraded = false;
-    this.animTimer = 0;
-    this.walkFrame = 0;
+    this.bobPhase = Math.random() * 10;
     this.score = 0;
     this.alive = true;
     this.justHurt = false;
@@ -160,39 +159,18 @@ export class Player {
     if (this.invincibleTimer > 0) this.invincibleTimer -= dt;
     if (this.swingTimer > 0) this.swingTimer -= dt;
     if (this.swingCooldown > 0) this.swingCooldown -= dt;
-
-    if (Math.abs(this.vx) > 5 && this.onGround) {
-      this.animTimer += dt;
-      if (this.animTimer > 0.14) {
-        this.animTimer = 0;
-        this.walkFrame = 1 - this.walkFrame;
-      }
-    } else {
-      this.animTimer = 0;
-    }
-  }
-
-  get spriteFrame() {
-    if (!this.onGround) return S.PLAYER_FRAMES.jump;
-    if (this.hurtTimer > 0.5) return S.PLAYER_FRAMES.hurt;
-    if (Math.abs(this.vx) > 5) return this.walkFrame === 0 ? S.PLAYER_FRAMES.walk1 : S.PLAYER_FRAMES.walk2;
-    return S.PLAYER_FRAMES.idle;
   }
 
   draw(ctx, camX, tick) {
     const flicker = this.hurtTimer > 0 && Math.floor(tick * 20) % 2 === 0;
     if (flicker) return;
-    const rainbow = this.invincibleTimer > 0;
-    const overrides = rainbow
-      ? { p: hslCycle(tick, 0), l: hslCycle(tick, 40), r: hslCycle(tick, 200) }
-      : null;
 
     // bat swing (drawn behind or in front depending on facing so it reads as an arc)
     if (this.swingTimer > 0) {
       const progress = 1 - this.swingTimer / SWING_DURATION;
       const angle = (this.facing === 1 ? 1 : -1) * (-0.9 + progress * 1.8);
-      const pivotX = this.x - camX + (this.facing === 1 ? this.w - 3 : 3);
-      const pivotY = this.y + 12;
+      const pivotX = this.x - camX + (this.facing === 1 ? this.w * 0.85 : this.w * 0.15);
+      const pivotY = this.y + this.h * 0.5;
       ctx.save();
       ctx.translate(pivotX, pivotY);
       ctx.rotate(angle);
@@ -204,9 +182,20 @@ export class Player {
       ctx.restore();
     }
 
-    S.drawSprite(ctx, 'player', this.spriteFrame, S.PLAYER_PALETTE, this.x - camX, this.y, {
-      flip: this.facing === -1,
-      overrides,
+    // The bat's natural pose already reads as mid-flight, so instead of a
+    // walk-cycle it gets a bob (bigger/faster while moving) and a jump/fall
+    // tilt — cheap procedural animation for a single piece of artwork.
+    const moving = this.onGround && Math.abs(this.vx) > 5;
+    const bobAmp = moving ? 2.2 : 1;
+    const bobSpeed = moving ? 11 : 3;
+    const bob = Math.sin(tick * bobSpeed + this.bobPhase) * bobAmp;
+    const tilt = this.onGround ? 0 : Math.max(-0.35, Math.min(0.45, this.vy / 700));
+    const tint = this.invincibleTimer > 0 ? hslCycle(tick, 0) : null;
+
+    S.drawPlayerImage(ctx, S.getPlayerImage(), this.x - camX, this.y + bob, this.w, this.h, {
+      flip: this.facing === 1, // artwork's natural pose faces left
+      rotation: tilt,
+      tint,
     });
   }
 }

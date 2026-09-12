@@ -210,15 +210,17 @@ function buildLevel(cfg) {
     x,
     id: i,
   }));
+  // Max jump rise is ~37px (JUMP_VELOCITY^2 / 2*GRAVITY), so pickups need to
+  // sit well under that from a flat-ground jump, not just "up in the air".
   const bugSpawns = spread(cfg.bugCount, 200, bossArenaStart - 100).map((x) => ({
     kind: 'bug',
     x,
-    y: GROUND_Y - 60,
+    y: GROUND_Y - 34,
   }));
   const goldBugSpawns = spread(cfg.goldBugCount, 400, bossArenaStart - 200).map((x) => ({
     kind: 'goldbug',
     x,
-    y: GROUND_Y - 80,
+    y: GROUND_Y - 44,
   }));
   const pickupSpawns = [...bugSpawns, ...goldBugSpawns];
   if (cfg.endPowerup) {

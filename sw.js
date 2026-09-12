@@ -1,6 +1,6 @@
 // Minimal offline cache so Buddy the Bat keeps working once it's been loaded
 // (handy for a "installed to home screen" mobile play session).
-const CACHE_NAME = 'buddy-the-bat-v3';
+const CACHE_NAME = 'buddy-the-bat-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -9,6 +9,7 @@ const ASSETS = [
   './assets/icon-favicon.png',
   './assets/icon-192.png',
   './assets/icon-512.png',
+  './assets/player-bat.png',
   './js/main.js',
   './js/game.js',
   './js/constants.js',
