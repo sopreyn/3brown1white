@@ -1,4 +1,4 @@
-import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, STORAGE_KEY } from './constants.js';
+import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, STORAGE_KEY, PEACEFUL_MODE } from './constants.js';
 import { Player, Enemy, Boss, Pickup, Projectile, aabb } from './entities.js';
 import { LEVELS, drawBackground, drawEndingBackground, drawBridgeForegroundBeams } from './levels.js';
 import * as S from './sprites.js';
@@ -313,25 +313,27 @@ function resolveCollisions() {
     // still hit something that walks into it late — but not the same target twice
   }
 
-  // Contact damage: enemies
-  for (const en of world.enemies) {
-    if (!en.alive || en.hurtFlash > 0) continue;
-    if (aabb(player, en)) {
-      if (player.takeDamage(en.cfg.damage, en.x + en.w / 2)) sfx.hurt();
+  if (!PEACEFUL_MODE) {
+    // Contact damage: enemies
+    for (const en of world.enemies) {
+      if (!en.alive || en.hurtFlash > 0) continue;
+      if (aabb(player, en)) {
+        if (player.takeDamage(en.cfg.damage, en.x + en.w / 2)) sfx.hurt();
+      }
     }
-  }
-  // Contact damage: boss
-  if (world.boss.alive && world.boss.introDone && world.boss.hurtFlash <= 0) {
-    if (aabb(player, world.boss)) {
-      if (player.takeDamage(world.boss.cfg.damage, world.boss.x + world.boss.w / 2)) sfx.hurt();
+    // Contact damage: boss
+    if (world.boss.alive && world.boss.introDone && world.boss.hurtFlash <= 0) {
+      if (aabb(player, world.boss)) {
+        if (player.takeDamage(world.boss.cfg.damage, world.boss.x + world.boss.w / 2)) sfx.hurt();
+      }
     }
-  }
-  // Projectiles vs player
-  for (const pr of world.projectiles) {
-    if (pr.dead) continue;
-    if (aabb(player, pr)) {
-      pr.dead = true;
-      if (player.takeDamage(pr.damage, pr.x)) sfx.hurt();
+    // Projectiles vs player
+    for (const pr of world.projectiles) {
+      if (pr.dead) continue;
+      if (aabb(player, pr)) {
+        pr.dead = true;
+        if (player.takeDamage(pr.damage, pr.x)) sfx.hurt();
+      }
     }
   }
   // Pickups

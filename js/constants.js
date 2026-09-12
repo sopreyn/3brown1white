@@ -30,3 +30,10 @@ export const KNOCKBACK_VY = -180;
 export const PIXEL = 2; // size (in game px) of one "art pixel" for character sprites
 
 export const STORAGE_KEY = 'buddyBatSave.v1';
+
+// When true, enemies/boss/projectiles are still there and animate normally,
+// but can't damage the player on contact — lets you walk straight through a
+// level to see the art/lighting without having to fight. Swinging still
+// damages them as normal, so bosses can still be beaten to advance levels.
+// Left false on the real game; flipped to true on testing-branch only.
+export const PEACEFUL_MODE = false;
